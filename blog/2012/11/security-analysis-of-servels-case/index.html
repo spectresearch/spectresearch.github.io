@@ -1,0 +1,278 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Security analysis of Servel's case</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=bac5711c0a">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=bac5711c0a">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+
+    <link rel="canonical" href="http://www.spect.cl/blog/2012/11/security-analysis-of-servels-case/">
+    <meta name="referrer" content="origin">
+    
+    <meta property="og:site_name" content="SPECT Research">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Security analysis of Servel's case">
+    <meta property="og:description" content="A lot of time ago, there was an incident related to citizenship privacy in Chile and many people, even from other countries, published some posts about it [1][2][3]. Today, with all citizen data made public due to an...">
+    <meta property="og:url" content="http://www.spect.cl/blog/2012/11/security-analysis-of-servels-case/">
+    <meta property="article:published_time" content="2012-11-21T12:00:00.000Z">
+    <meta property="article:modified_time" content="2015-09-10T09:19:05.856Z">
+    <meta property="article:tag" content="security">
+    <meta property="article:tag" content="review">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Security analysis of Servel's case">
+    <meta name="twitter:description" content="A lot of time ago, there was an incident related to citizenship privacy in Chile and many people, even from other countries, published some posts about it [1][2][3]. Today, with all citizen data made public due to an...">
+    <meta name="twitter:url" content="http://www.spect.cl/blog/2012/11/security-analysis-of-servels-case/">
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "SPECT Research",
+    "author": {
+        "@type": "Person",
+        "name": "Claudio Salazar",
+        "image": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
+        "url": "http://www.spect.cl/author/claudio",
+        "sameAs": null,
+        "description": null
+    },
+    "headline": "Security analysis of Servel&#x27;s case",
+    "url": "http://www.spect.cl/blog/2012/11/security-analysis-of-servels-case/",
+    "datePublished": "2012-11-21T12:00:00.000Z",
+    "dateModified": "2015-09-10T09:19:05.856Z",
+    "keywords": "security, review",
+    "description": "A lot of time ago, there was an incident related to citizenship privacy in Chile and many people, even from other countries, published some posts about it [1][2][3]. Today, with all citizen data made public due to an..."
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.7">
+    <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
+    <script>
+var disqus_shortname = 'spectresearch';
+var ga_id = 'UA-18043187-1';
+</script>
+</head>
+
+<body><header class="main-header no-cover">
+    <div class="vertical">
+        <div class="main-header-content inner">
+            <h1 class="page-title">SPECT Research</h1>
+            <h2 class="page-description">Security and Software Development</h2>
+            <br>
+            <div>
+              <a class="spectnav" href="/"><i class="fa fa-home"></i> Home</a>
+              <a class="spectnav" href="/about/"><i class="fa fa-group"></i> About us</a>
+              <a class="spectnav" href="/projects/"><i class="fa fa-copy"></i> Projects</a>
+              <a class="spectnav" href="/education/"><i class="fa fa-book"></i> Education</a>
+            </div>
+            <div>
+              <a class="spectnav" href="http://github.com/spectresearch"><i class="spectnav fa fa-github"></i></a>
+              <a class="spectnav" href="http://twitter.com/spectresearch"><i class="spectnav fa fa-twitter"></i></a>
+            </div>
+        </div>
+    </div>
+    <a class="scroll-down icon-arrow-left" href="#content" data-offset="-45"><span class="hidden">Scroll Down</span></a>
+</header>
+
+
+
+    
+
+    <div class="site-wrapper">
+
+        
+
+
+<main class="content" role="main">
+    <article class="post tag-security tag-review">
+
+        <header class="post-header">
+            <h1 class="post-title">Security analysis of Servel's case</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2012-11-21">21 November 2012</time>  on <a href="/tag/security/">security</a>, <a href="/tag/review/">review</a>
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>A lot of time ago, there was an incident related to citizenship privacy in Chile and many people, even from other countries, published some posts about it <a href="http://blog.secureless.org/data-leak/los-datos-de-13-millones-de-chilenos-disponibles-en-la-red-tor/">[1]</a><a href="http://zaufanatrzeciastrona.pl/post/wyciek-danych-wszystkich-wyborcow-czyli-jak-nie-udostepniac-rzadowych-baz-danych/">[2]</a><a href="http://blog.secureless.org/data-leak/links-para-descargar-los-archivos-pdf-con-datos-de-13-millones-de-chilenos/">[3]</a>. Today, with all citizen data made public due to an important lack of awareness about privacy and security, I'll describe the weak patch implemented at Servel's page to avoid massive requests of citizen information. This was a <em>CAPTCHA</em> solution which I broke by two methods: a logic flaw and a design weakness.</p>
+
+<p>In SPECT Research we aren't used to make public vulnerabilities in web sites, but we have a strong commitment with the citizenship and the issues affecting their privacy. In this case, even my information was compromised. I think the vulnerabilities explained here are harmless, since all citizen information extracted from Servel's site is available in networks like Tor or direct download, as it's mentioned in referenced posts.</p>
+
+<!-- more -->
+
+<h2 id="asimpleflawinthelogiccaptchabypass">A simple flaw in the logic: CAPTCHA bypass</h2>
+
+<p>First three queries to <a href="http://consulta.servel.cl/">Servel's page</a> with a valid <em>RUN</em> doesn't require <em>CAPTCHA</em> solution. After that, a <em>CAPTCHA</em> is displayed and you need to answer it correctly in order to get citizen information. But what if instead of answering this new form with new fields you replay previous requests?</p>
+
+<p>I think this flaw in the logic was implemented by staff in charge of the web site. After three queries, the <em>CAPTCHA</em> is displayed but this new form isn't enforced. You can use previous requests, change the <em>RUN</em> and get citizen information, bypassing the <em>CAPTCHA</em>.</p>
+
+<h2 id="from625to100ofsuccessincaptchasolving">From 62.5% to 100% of success in CAPTCHA solving</h2>
+
+<p>In late April this year, I published a <a href="http://www.youtube.com/watch?v=1NqOWSqPHX0">video</a> solving the <em>CAPTCHA</em> present in Servel's page with a 62.5% of success guessing the numbers of the <em>CAPTCHA</em>. After that, I did a little research to improve this percentage based on the first work.</p>
+
+<p>The software used by Servel's page was <a href="http://www.brainjar.com/dotnet/captchaimage/default2.asp">CAPTCHA Image</a>. Its source code is available so you can check how <em>CAPTCHA</em>s are created. The initial version of the <em>CAPTCHA</em> solver script did the following steps on the <em>CAPTCHA</em> image:</p>
+
+<ol>
+<li><p>Use <em>convert</em> utility (from ImageMagick) to apply a Difference of Gaussian (DoG) filter to the image. This was the best filter to highlight borders of the image.</p></li>
+<li><p>Use <a href="https://code.google.com/p/pytesser/">pytesser</a> (a python wrapper for Tesseract) to read the numbers from the image. I did some modifications on the code to run the script.</p></li>
+</ol>
+
+<p>With that approach, I got 62.5% of success, so the next step was thinking ideas to improve the results. I thought about improving clarity of the numbers in the image, through application of new filters. This was a difficult way since the noise in the background is always present and the filters could get confused, so image clarity wouldn't improve in the expected manner. <br>
+After that closed door, I thought about flaws in the logic of <em>CAPTCHA Image</em>. As it's explained in its <a href="http://www.brainjar.com/dotnet/captchaimage/default2.asp">web site</a>, the workflow is the following:</p>
+
+<ol>
+<li>CAPTCHA Image generates a random text  </li>
+<li>It stores the text in the Session object (<code>Session["CaptchaImageText"]</code>)  </li>
+<li>It creates the CAPTCHA image using <code>Session["CaptchaImageText"]</code>  </li>
+<li>Finally, it validates the user input against <code>Session["CaptchaImageText"]</code></li>
+</ol>
+
+<p>The page in charge of this handling is <em>Default.aspx.cs</em>, specifically the method <code>Page_Load()</code>, displayed next:</p>
+
+<pre><code class="language- language-csharp line-numbers">private void Page_Load(object sender, System.EventArgs e)  
+{
+  if (!this.IsPostBack)
+
+    // Create a random code and store it in the Session object.
+    this.Session["CaptchaImageText"] = GenerateRandomCode();
+
+  else
+  {
+    // On a postback, check the user input.
+    if (this.CodeNumberTextBox.Text == this.Session["CaptchaImageText"].ToString())
+    {
+      // Display an informational message.
+      this.MessageLabel.CssClass = "info";
+      this.MessageLabel.Text = "Correct!";
+    }
+    else
+    {
+      // Display an error message.
+      this.MessageLabel.CssClass = "error";
+      this.MessageLabel.Text = "ERROR: Incorrect, try again.";
+
+      // Clear the input and create a new random code.
+      this.CodeNumberTextBox.Text = "";
+      this.Session["CaptchaImageText"] = GenerateRandomCode();
+    }
+  }
+}
+</code></pre>
+
+<p>At the first request (a <code>GET</code> request), the condition at line 3 is <code>True</code> then <em>CAPTCHA</em> text is generated and related to your session. In other case, if it's a valid <a href="http://msdn.microsoft.com/en-us/library/system.web.ui.page.ispostback(v=vs.71).aspx">PostBack</a> request then the user input is validated as right or wrong. <br>
+It seems like if you correctly answer the <em>CAPTCHA</em>, the variable <code>Session["CaptchaImageText"]</code> is never cleaned, then you could request over and over successfully using the same initial <em>CAPTCHA</em> solution, but it's not true in practice. I don't know if they added some countermeasure for that or the same <em>CAPTCHA Image</em> made some call to generate another random text.</p>
+
+<p>Recalling from <em>CAPTCHA Image</em> workflow, at point 3 the CAPTCHA image is generated from <code>Session["CaptchaImageText"]</code> in page <code>JpegImage.aspx</code>. Looking at the code in <code>Default.aspx.cs</code>, if you made a bad guess the <em>CAPTCHA</em> text is regenerated. Otherwise, it's kept. You can generate infinite images requesting <code>JpegImage.aspx</code> with the same <code>Session["CaptchaImageText"]</code> and all images will have the same number. This, combined with my first script, is the new approach.</p>
+
+<p>The script fails when it can't correctly guess the text in the image. It's due to the fact that some <em>CAPTCHA</em> images have much noise, or their rotation values are high and the texts are very distorted. But if you can generate many images, some of them will be guessed well. In this case, the success of the script is 62.5%, so I could request five images, if three of them match the same guess, I could confirm with around 100% of accuracy that the guess was right.</p>
+
+<p>A video showing <em>CAPTCHA Image</em> solver running is shown next:</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/D_9zj9X9j6U?rel=0" frameborder="0" allowfullscreen></iframe>
+
+<p>The source code of <em>CAPTCHA Image</em> solver is available <a href="https://github.com/spectresearch/captcha_image_solver">here</a>.</p>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="/author/claudio/" style="background-image: url(//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x)"><span class="hidden">Claudio Salazar's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="/author/claudio/">Claudio Salazar</a></h4>
+
+                    <p>Read <a href="/author/claudio/">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=Security%20analysis%20of%20Servel's%20case&amp;url=http://www.spect.cl/blog/2012/11/security-analysis-of-servels-case/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://www.spect.cl/blog/2012/11/security-analysis-of-servels-case/" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://www.spect.cl/blog/2012/11/security-analysis-of-servels-case/" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        <footer class="post comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  (function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + window.disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</footer>
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+    <a class="read-next-story no-cover" href="/blog/2013/01/launching-malware-en-chile/">
+        <section class="post">
+            <h2>Launching Malware en Chile</h2>
+            <p>Today, we're launching a new project called "Malware en Chile". The purpose of this project is to analize malware…</p>
+        </section>
+    </a>
+    <a class="read-next-story prev no-cover" href="/blog/2012/02/vulnerabilities-in-fiberhome-hg110-and-implications-for-movistar/">
+        <section class="post">
+            <h2>Vulnerabilities in FiberHome HG110 and implications for Movistar</h2>
+            <p>Update 1: Movistar, a day after this post was published, contacted me to solve the security problems. In this…</p>
+        </section>
+    </a>
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2015</section>
+        </footer>
+
+    </div>
+
+    <!-- You can safely delete this line if your theme does not require jQuery -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+  if (window.ga_id) {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', window.ga_id, 'auto');
+    ga('require', 'linkid', 'linkid.js');
+    ga('send', 'pageview');
+  }
+</script>
+
+    <script type="text/javascript" src="/assets/js/prism.js?v=bac5711c0a"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=bac5711c0a"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=bac5711c0a"></script>
+
+
+</body>
