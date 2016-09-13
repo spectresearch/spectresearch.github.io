@@ -12,17 +12,18 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=c874ada865">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=c874ada865">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=887acf5388">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=887acf5388">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
     <link rel="canonical" href="http://www.spect.cl/blog/2012/02/vulnerabilities-in-fiberhome-hg110-and-implications-for-movistar/">
-    <meta name="referrer" content="origin">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <link rel="amphtml" href="http://www.spect.cl/blog/2012/02/vulnerabilities-in-fiberhome-hg110-and-implications-for-movistar/amp/">
     
     <meta property="og:site_name" content="SPECT Research">
     <meta property="og:type" content="article">
     <meta property="og:title" content="Vulnerabilities in FiberHome HG110 and implications for Movistar">
-    <meta property="og:description" content="Update 1: Movistar, a day after this post was published, contacted me to solve the security problems. In this article I'll show two vulnerabilities found in the router FiberHome HG-110, provided by Movistar in large numbers to its clients in...">
+    <meta property="og:description" content="Update 1: Movistar, a day after this post was published, contacted me to solve the security problems. In this article I'll show two vulnerabilities found in the router FiberHome HG-110, provided by Movistar in large numbers to its clients in the last time. I must clarify I'm currently a client">
     <meta property="og:url" content="http://www.spect.cl/blog/2012/02/vulnerabilities-in-fiberhome-hg110-and-implications-for-movistar/">
     <meta property="article:published_time" content="2012-02-22T12:00:00.000Z">
     <meta property="article:modified_time" content="2015-09-10T09:26:35.875Z">
@@ -31,32 +32,49 @@
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Vulnerabilities in FiberHome HG110 and implications for Movistar">
-    <meta name="twitter:description" content="Update 1: Movistar, a day after this post was published, contacted me to solve the security problems. In this article I'll show two vulnerabilities found in the router FiberHome HG-110, provided by Movistar in large numbers to its clients in...">
+    <meta name="twitter:description" content="Update 1: Movistar, a day after this post was published, contacted me to solve the security problems. In this article I'll show two vulnerabilities found in the router FiberHome HG-110, provided by Movistar in large numbers to its clients in the last time. I must clarify I'm currently a client">
     <meta name="twitter:url" content="http://www.spect.cl/blog/2012/02/vulnerabilities-in-fiberhome-hg110-and-implications-for-movistar/">
+    <meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="Claudio Salazar">
+    <meta name="twitter:label2" content="Filed under">
+    <meta name="twitter:data2" content="security, vulnerability">
+    <meta name="twitter:site" content="@spectresearch">
     
     <script type="application/ld+json">
 {
-    "@context": "http://schema.org",
+    "@context": "https://schema.org",
     "@type": "Article",
-    "publisher": "SPECT Research",
+    "publisher": {
+        "@type": "Organization",
+        "name": "SPECT Research",
+        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+    },
     "author": {
         "@type": "Person",
         "name": "Claudio Salazar",
-        "image": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
-        "url": "http://www.spect.cl/author/claudio",
-        "sameAs": null,
-        "description": null
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "http://www.spect.cl/author/claudio/",
+        "sameAs": []
     },
     "headline": "Vulnerabilities in FiberHome HG110 and implications for Movistar",
     "url": "http://www.spect.cl/blog/2012/02/vulnerabilities-in-fiberhome-hg110-and-implications-for-movistar/",
     "datePublished": "2012-02-22T12:00:00.000Z",
     "dateModified": "2015-09-10T09:26:35.875Z",
     "keywords": "security, vulnerability",
-    "description": "Update 1: Movistar, a day after this post was published, contacted me to solve the security problems. In this article I&#x27;ll show two vulnerabilities found in the router FiberHome HG-110, provided by Movistar in large numbers to its clients in..."
+    "description": "Update 1: Movistar, a day after this post was published, contacted me to solve the security problems. In this article I&#x27;ll show two vulnerabilities found in the router FiberHome HG-110, provided by Movistar in large numbers to its clients in the last time. I must clarify I&#x27;m currently a client",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "http://www.spect.cl"
+    }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.7">
+    <meta name="generator" content="Ghost 0.10">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -225,16 +243,16 @@ low or none, I made public this information.</p>
 </main>
 
 <aside class="read-next">
-    <a class="read-next-story no-cover" href="/blog/2012/11/security-analysis-of-servels-case/">
+    <a class="read-next-story no-cover" href="/blog/2016/09/para-la-constitucion-una-conversacion-sobre-seguridad/">
         <section class="post">
-            <h2>Security analysis of Servel's case</h2>
-            <p>A lot of time ago, there was an incident related to citizenship privacy in Chile and many people, even…</p>
+            <h2>Para la constitución, una conversación (sobre seguridad)</h2>
+            <p>El día de ayer fue lanzado un exploit para MySQL que permite escalar privilegios dada una serie de condiciones.…</p>
         </section>
     </a>
-    <a class="read-next-story prev no-cover" href="/blog/2011/12/security-in-chile-task-of-everyone/">
+    <a class="read-next-story prev no-cover" href="/blog/2016/02/vulnerabilidades-en-claveunica/">
         <section class="post">
-            <h2>Security in Chile, task of everyone</h2>
-            <p>In SPECT Research we're in favor of responsible vulnerability notification, giving some time to developers to make the necessary…</p>
+            <h2>Vulnerabilidades en Clave Unica</h2>
+            <p>Clave Única es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar…</p>
         </section>
     </a>
 </aside>
@@ -261,9 +279,9 @@ low or none, I made public this information.</p>
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=c874ada865"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=c874ada865"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=c874ada865"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=887acf5388"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=887acf5388"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=887acf5388"></script>
 
 
 </body>

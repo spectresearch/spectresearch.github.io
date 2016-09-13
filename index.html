@@ -12,12 +12,12 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=c874ada865">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=c874ada865">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=887acf5388">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=887acf5388">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
     <link rel="canonical" href="http://www.spect.cl/">
-    <meta name="referrer" content="origin">
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="next" href="http://www.spect.cl/page/2/">
     
     <meta property="og:site_name" content="SPECT Research">
@@ -25,23 +25,31 @@
     <meta property="og:title" content="SPECT Research">
     <meta property="og:description" content="Security and Software Development">
     <meta property="og:url" content="http://www.spect.cl/">
-    
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="SPECT Research">
     <meta name="twitter:description" content="Security and Software Development">
     <meta name="twitter:url" content="http://www.spect.cl/">
+    <meta name="twitter:site" content="@spectresearch">
     
     <script type="application/ld+json">
 {
-    "@context": "http://schema.org",
+    "@context": "https://schema.org",
     "@type": "Website",
-    "publisher": "SPECT Research",
+    "publisher": {
+        "@type": "Organization",
+        "name": "SPECT Research",
+        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+    },
     "url": "http://www.spect.cl/",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "http://www.spect.cl"
+    },
     "description": "Security and Software Development"
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.7">
+    <meta name="generator" content="Ghost 0.10">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -82,10 +90,25 @@ var ga_id = 'UA-18043187-1';
     <div class="extra-pagination inner">
     <nav class="pagination" role="navigation">
     <span class="page-number">Page 1 of 4</span>
-        <a class="older-posts" href="/page/2/">Older Posts →</a>
+        <a class="older-posts" href="/page/2/">Older Posts <span aria-hidden="true">→</span></a>
 </nav>
+
 </div>
 
+<article class="post tag-security tag-chile">
+    <header class="post-header">
+        <h2 class="post-title"><a href="/blog/2016/09/para-la-constitucion-una-conversacion-sobre-seguridad/">Para la constitución, una conversación (sobre seguridad)</a></h2>
+    </header>
+    <section class="post-excerpt">
+        <p>El día de ayer fue lanzado un exploit para MySQL que permite escalar privilegios dada una serie de condiciones. El peor caso es que una simple <a class="read-more" href="/blog/2016/09/para-la-constitucion-una-conversacion-sobre-seguridad/">»</a></p>
+    </section>
+    <footer class="post-meta">
+        <img class="author-thumb" src="//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x" alt="Claudio Salazar" nopin="nopin">
+        <a href="/author/claudio/">Claudio Salazar</a>
+         on <a href="/tag/security/">security</a>, <a href="/tag/chile/">chile</a>
+        <time class="post-date" datetime="2016-09-13">13 September 2016</time>
+    </footer>
+</article>
 <article class="post tag-security tag-chile">
     <header class="post-header">
         <h2 class="post-title"><a href="/blog/2016/02/vulnerabilidades-en-claveunica/">Vulnerabilidades en Clave Unica</a></h2>
@@ -142,25 +165,12 @@ var ga_id = 'UA-18043187-1';
         <time class="post-date" datetime="2015-09-13">13 September 2015</time>
     </footer>
 </article>
-<article class="post tag-security tag-chile">
-    <header class="post-header">
-        <h2 class="post-title"><a href="/blog/2015/09/is-it-safe-to-shop-on-the-chilean-internet-no/">Is it safe to shop on the Chilean Internet? No.</a></h2>
-    </header>
-    <section class="post-excerpt">
-        <p>When you go to a bank to open a checking account, it's almost a must-have to contract a fraud insurance. In a perfect world you wouldn't <a class="read-more" href="/blog/2015/09/is-it-safe-to-shop-on-the-chilean-internet-no/">»</a></p>
-    </section>
-    <footer class="post-meta">
-        <img class="author-thumb" src="//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x" alt="Claudio Salazar" nopin="nopin">
-        <a href="/author/claudio/">Claudio Salazar</a>
-         on <a href="/tag/security/">security</a>, <a href="/tag/chile/">chile</a>
-        <time class="post-date" datetime="2015-09-10">10 September 2015</time>
-    </footer>
-</article>
 
 <nav class="pagination" role="navigation">
     <span class="page-number">Page 1 of 4</span>
-        <a class="older-posts" href="/page/2/">Older Posts →</a>
+        <a class="older-posts" href="/page/2/">Older Posts <span aria-hidden="true">→</span></a>
 </nav>
+
 
 </main>
 
@@ -185,9 +195,9 @@ var ga_id = 'UA-18043187-1';
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=c874ada865"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=c874ada865"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=c874ada865"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=887acf5388"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=887acf5388"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=887acf5388"></script>
 
 
 </body>
