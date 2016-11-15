@@ -1,0 +1,318 @@
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Challenges in Web Software Detection</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+
+    <link rel="canonical" href="http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <link rel="amphtml" href="http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/amp/">
+    
+    <meta property="og:site_name" content="SPECT Research">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Challenges in Web Software Detection">
+    <meta property="og:description" content="As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions.  I've been an user of WhatWeb for a long time, even created my own plugins. It has had little activity on its development lastly then">
+    <meta property="og:url" content="http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/">
+    <meta property="article:published_time" content="2016-11-15T20:39:24.000Z">
+    <meta property="article:modified_time" content="2016-11-15T20:41:10.000Z">
+    <meta property="article:tag" content="security">
+    <meta property="article:tag" content="detectem">
+    
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Challenges in Web Software Detection">
+    <meta name="twitter:description" content="As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions.  I've been an user of WhatWeb for a long time, even created my own plugins. It has had little activity on its development lastly then">
+    <meta name="twitter:url" content="http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/">
+    <meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="Claudio Salazar">
+    <meta name="twitter:label2" content="Filed under">
+    <meta name="twitter:data2" content="security, detectem">
+    <meta name="twitter:site" content="@spectresearch">
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "SPECT Research",
+        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Claudio Salazar",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "http://www.spect.cl/author/claudio/",
+        "sameAs": []
+    },
+    "headline": "Challenges in Web Software Detection",
+    "url": "http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/",
+    "datePublished": "2016-11-15T20:39:24.000Z",
+    "dateModified": "2016-11-15T20:41:10.000Z",
+    "keywords": "security, detectem",
+    "description": "As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions.  I&#x27;ve been an user of WhatWeb for a long time, even created my own plugins. It has had little activity on its development lastly then",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "http://www.spect.cl"
+    }
+}
+    </script>
+
+    <meta name="generator" content="Ghost 0.11">
+    <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
+    <script>
+var disqus_shortname = 'spectresearch';
+var ga_id = 'UA-18043187-1';
+</script>
+</head>
+
+<body><header class="main-header no-cover">
+    <div class="vertical">
+        <div class="main-header-content inner">
+            <h1 class="page-title">SPECT Research</h1>
+            <h2 class="page-description">Security and Software Development</h2>
+            <br>
+            <div>
+              <a class="spectnav" href="/"><i class="fa fa-home"></i> Home</a>
+              <a class="spectnav" href="/about/"><i class="fa fa-group"></i> About us</a>
+              <a class="spectnav" href="/projects/"><i class="fa fa-copy"></i> Projects</a>
+              <a class="spectnav" href="/education/"><i class="fa fa-book"></i> Education</a>
+            </div>
+            <div>
+              <a class="spectnav" href="http://github.com/spectresearch"><i class="spectnav fa fa-github"></i></a>
+              <a class="spectnav" href="http://twitter.com/spectresearch"><i class="spectnav fa fa-twitter"></i></a>
+            </div>
+        </div>
+    </div>
+    <a class="scroll-down icon-arrow-left" href="#content" data-offset="-45"><span class="hidden">Scroll Down</span></a>
+</header>
+
+
+
+    
+
+    <div class="site-wrapper">
+
+        
+
+
+<main class="content" role="main">
+    <article class="post tag-security tag-detectem">
+
+        <header class="post-header">
+            <h1 class="post-title">Challenges in Web Software Detection</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2016-11-15">15 November 2016</time>  on <a href="/tag/security/">security</a>, <a href="/tag/detectem/">detectem</a>
+            </section>
+        </header>
+
+        <section class="post-content">
+            <p>As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions. </p>
+
+<p>I've been an user of <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> for a long time, even created my own plugins. It has had little activity on its development lastly then I've started to use <a href="https://wappalyzer.com/">Wappalyzer</a> but it's passive and lacks some useful features from <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a>. Starting a new project where the software and version detection is essential, I see that current solutions don't fit my requirements but I can take some good ideas from them.</p>
+
+<p>I've separated the problem in two parts: first, the challenges detecting software and second, the more complicated issue of detecting the software version. I've named the software which detects web software in a site as <code>detector</code> in this post.</p>
+
+<h2 id="detectingthesoftware">Detecting the software</h2>
+
+<p>In the past, a single request was enough to know what software was running on a site and get almost every library reference. However with the extensive use of <em>Javascript</em> it has turned more complex to obtain library references with a single request. You have to also see the new scenario with minifiers, bundlers and obfuscators.</p>
+
+<p>Nowadays a <em>Javascript</em> rendering engine is almost a <strong>must</strong> in a <code>detector</code>. Without it, you're missing a lot of new sites that use dynamic loading of libraries. Currently, <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> does a straightforward request without interpreting the <em>Javascript</em> response. In example, we can see a detection run against <a href="https://www.fayerwayer.com">Fayerwayer</a> which is an Angular application:</p>
+
+<pre><code>$ ruby whatweb https://www.fayerwayer.com
+https://www.fayerwayer.com [200] Country[CHILE][CL], HTTPServer[nginx/1.1.19], IP[190.13.66.54], UncommonHeaders[access-control-allow-origin], nginx[1.1.19]  
+</code></pre>
+
+<p>The same happens for <a href="https://wappalyzer.com/">Wappalyzer</a> as library.</p>
+
+<pre><code>$ node wapp.js
+{ Nginx: 
+   { app: 'Nginx',
+     confidence: { 'headers Server /nginx(?:\/([\d.]+))?/i': 100 },
+     confidenceTotal: 100,
+     detected: true,
+     excludes: [],
+     version: '1.1.19',
+     versions: [ '1.1.19' ] } }
+</code></pre>
+
+<p>However, it's also a Firefox and Chrome extension and in those cases it does the detection against the rendered <em>HTML</em> given by the browser. That way it detects successfully the software on the site.</p>
+
+<p><img src="http://cdn.spect.cl/blog/posts/images/wappalyzer-browser.png"></p>
+
+<p>Going deep in the subject, minifiers add an extra layer of complexity. Looking at <a href="https://code.jquery.com/jquery/">jQuery</a> releases, it seems simple in some cases since there are key strings (in this case comments) that could help to detect a software, but minifiers like <a href="https://github.com/mishoo/UglifyJS2">Uglify2</a> have a lot of options then one source code could generate many different minified files. It's an open area to research.</p>
+
+<p>Bundling consists in putting different libraries in just one file. Then having the <code>bundle.js</code> file it could be easy to detect software by searching for key strings but it could even better to split <code>bundle.js</code> and be able to do content comparisons at some level (not identical but some algorithm could assist).</p>
+
+<p>Obfuscators are even harder to deal but they aren't usually used in web applications (I see them in custom applications but not in widely-used libraries).</p>
+
+<h2 id="detectingthesoftwareversion">Detecting the software version</h2>
+
+<p>Let's start detecting the software version using the simplest approach: getting the version from the main response. It's possible through many ways:</p>
+
+<ul>
+<li>Some text indicator (<em>i.e.</em> <code>powered by A version x.x.x</code>) </li>
+<li>Some version argument (<em>i.e.</em> <code>?ver=x.x.x</code>).</li>
+<li>The version as part of the path (<em>i.e.</em> <code>/sw/x.x.x/script.js</code>).</li>
+</ul>
+
+<p>From our <a href="http://www.espacioculinario.cl/">example site</a> we can see that some data could be extracted correctly:</p>
+
+<pre><code class="language-javascript">&lt;script src='http://www.espacioculinario.cl/wp-includes/js/jquery/jquery.js?ver=1.12.4'&gt;&lt;/script&gt;  
+</code></pre>
+
+<p>It uses <em>Jquery</em> version <code>1.12.4</code>. That was easy but it's not always the case since:</p>
+
+<ol>
+<li>Nowadays we usually don't find text indicators in common frontend libraries.  </li>
+<li>Version argument isn't trustworthy. For instance, in the example site there's a <em>Wordpress</em> plugin called <a href="https://wordpress.org/plugins/recipe-card/">recipe-card</a>.</li>
+</ol>
+
+<pre><code class="language-javascript">&lt;script src='http://www.espacioculinario.cl/wp-content/plugins/recipe-card/js/post.js?ver=4.6.1'&gt;&lt;/script&gt;  
+</code></pre>
+
+<p>Is its version <code>4.6.1</code>? According to the plugin homepage, its latest release was <code>1.1.7</code> but in some installations there's version contamination using the <em>Wordpress</em> version. Then it's not reliable to extract the version from some parameters like <code>ver</code>.</p>
+
+<p>A good idea from <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> is that for some plugins it has <code>MD5</code> comparisons of the library content, then you get the version with a great percent of preciseness. Obviously it involves an additional request to the library URL.</p>
+
+<h4 id="tests">Tests</h4>
+
+<p>I've been working for almost five years at <a href="https://scrapinghub.com">ScrapingHub</a> in several projects involving web scraping and when you develop this kind of software it's very important to have a good testing suite. Let's take as example the plugin <a href="https://github.com/urbanadventurer/WhatWeb/blob/master/plugins/eserv.rb">eserv</a> from <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a>:</p>
+
+<pre><code class="language- language-ruby">Plugin.define "Eserv" do  
+author "Brendan Coles &lt;bcoles@gmail.com&gt;" # 2012-10-22  
+version "0.1"  
+description "Eserv - Mail Server - SMTP/POP3/IMAP/HTTP"  
+website "http://www.eserv.ru/"
+
+matches [  
+# Version Detection # HTTP Server Header
+{ :search=&gt;"headers[server]", :version=&gt;/^Eserv\/([^\s]+)/ },
+
+# Meta Generator # Version Detection
+{ :version=&gt;/&lt;meta name="generator" content="Eserv\/([^\s^"]+)" \/&gt;/ },
+
+# Powered by footer # Version Detection
+{ :version=&gt;/&lt;span id='powered_by'&gt;[^&lt;]+&lt;a href="http:\/\/www\.eserv\.ru\/"&gt;&lt;span itemprop="name"&gt;Eserv&lt;\/span&gt;&lt;\/a&gt;\/([^\s]+)/ },
+]
+
+end  
+</code></pre>
+
+<p>What happens if the first entry in <code>matches</code> doesn't get the version completely for a site but the second one does? Is it fine to move the second entry to the top to be the first regex to be tried? With 5 sites it's manageable but when the list grows, it's hard to know if with our changes we're affecting the accurate detection in some sites.</p>
+
+<p>Neither <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> nor <a href="https://wappalyzer.com/">Wappalyzer</a> have public tests in their repositories and I think they are really important to have consistent results.</p>
+
+<h3 id="conclusions">Conclusions</h3>
+
+<p>After reviewing the <em>state-of-the-art</em> in the field, I would like to introduce <strong>detectem</strong>, a new application for web software detection in the <a href="http://spect.cl/blog/2016/11/introducing-detectem/">next post</a>.</p>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="/author/claudio/" style="background-image: url(//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x)"><span class="hidden">Claudio Salazar's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="/author/claudio/">Claudio Salazar</a></h4>
+
+                    <p>Read <a href="/author/claudio/">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=Challenges%20in%20Web%20Software%20Detection&amp;url=http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        <footer class="post comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  (function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + window.disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</footer>
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+    <a class="read-next-story no-cover" href="/blog/2016/11/introducing-detectem/">
+        <section class="post">
+            <h2>Introducing detectem</h2>
+            <p>I've created a project named detectem, trying to solve the issues described in the previous post. Let's review its…</p>
+        </section>
+    </a>
+    <a class="read-next-story prev no-cover" href="/blog/2016/11/eko12-writeup/">
+        <section class="post">
+            <h2>EKO12 Writeup</h2>
+            <p>La semana pasada asistí por primera vez a la ekoparty después de muchos años tratando de ir. Cerca de…</p>
+        </section>
+    </a>
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+        </footer>
+
+    </div>
+
+    <!-- You can safely delete this line if your theme does not require jQuery -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+  if (window.ga_id) {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', window.ga_id, 'auto');
+    ga('require', 'linkid', 'linkid.js');
+    ga('send', 'pageview');
+  }
+</script>
+
+    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+
+
+</body>
