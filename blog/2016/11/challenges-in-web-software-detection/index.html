@@ -27,7 +27,7 @@
     <meta property="og:description" content="As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions. I've been an user of WhatWeb for a long time, even created my own plugins. It has had little activity on its development lastly then">
     <meta property="og:url" content="http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/">
     <meta property="article:published_time" content="2016-11-15T20:39:24.000Z">
-    <meta property="article:modified_time" content="2016-11-15T20:41:10.000Z">
+    <meta property="article:modified_time" content="2017-10-30T18:08:14.000Z">
     <meta property="article:tag" content="security">
     <meta property="article:tag" content="detectem">
     
@@ -70,7 +70,7 @@
     "headline": "Challenges in Web Software Detection",
     "url": "http://www.spect.cl/blog/2016/11/challenges-in-web-software-detection/",
     "datePublished": "2016-11-15T20:39:24.000Z",
-    "dateModified": "2016-11-15T20:41:10.000Z",
+    "dateModified": "2017-10-30T18:08:14.000Z",
     "keywords": "security, detectem",
     "description": "As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions. I&#x27;ve been an user of WhatWeb for a long time, even created my own plugins. It has had little activity on its development lastly then",
     "mainEntityOfPage": {
@@ -157,7 +157,7 @@ https://www.fayerwayer.com [200] Country[CHILE][CL], HTTPServer[nginx/1.1.19], I
      versions: [ '1.1.19' ] } }
 </code></pre>
 <p>However, it's also a Firefox and Chrome extension and in those cases it does the detection against the rendered <em>HTML</em> given by the browser. That way it detects successfully the software on the site.</p>
-<img src="http://cdn.spect.cl/blog/posts/images/wappalyzer-browser.png">
+<img src="https://cdn.spect.cl/blog/posts/images/wappalyzer-browser.png">
 <p>Going deep in the subject, minifiers add an extra layer of complexity. Looking at <a href="https://code.jquery.com/jquery/">jQuery</a> releases, it seems simple in some cases since there are key strings (in this case comments) that could help to detect a software, but minifiers like <a href="https://github.com/mishoo/UglifyJS2">Uglify2</a> have a lot of options then one source code could generate many different minified files. It's an open area to research.</p>
 <p>Bundling consists in putting different libraries in just one file. Then having the <code>bundle.js</code> file it could be easy to detect software by searching for key strings but it could even better to split <code>bundle.js</code> and be able to do content comparisons at some level (not identical but some algorithm could assist).</p>
 <p>Obfuscators are even harder to deal but they aren't usually used in web applications (I see them in custom applications but not in widely-used libraries).</p>
@@ -169,20 +169,20 @@ https://www.fayerwayer.com [200] Country[CHILE][CL], HTTPServer[nginx/1.1.19], I
 <li>The version as part of the path (<em>i.e.</em> <code>/sw/x.x.x/script.js</code>).</li>
 </ul>
 <p>From our <a href="http://www.espacioculinario.cl/">example site</a> we can see that some data could be extracted correctly:</p>
-<pre><code class="language-language-javascript">&lt;script src='http://www.espacioculinario.cl/wp-includes/js/jquery/jquery.js?ver=1.12.4'&gt;&lt;/script&gt;
+<pre><code class="language-javascript">&lt;script src='http://www.espacioculinario.cl/wp-includes/js/jquery/jquery.js?ver=1.12.4'&gt;&lt;/script&gt;
 </code></pre>
 <p>It uses <em>Jquery</em> version <code>1.12.4</code>. That was easy but it's not always the case since:</p>
 <ol>
 <li>Nowadays we usually don't find text indicators in common frontend libraries.</li>
 <li>Version argument isn't trustworthy. For instance, in the example site there's a <em>Wordpress</em> plugin called <a href="https://wordpress.org/plugins/recipe-card/">recipe-card</a>.</li>
 </ol>
-<pre><code class="language-language-javascript">&lt;script src='http://www.espacioculinario.cl/wp-content/plugins/recipe-card/js/post.js?ver=4.6.1'&gt;&lt;/script&gt;
+<pre><code class="language-javascript">&lt;script src='http://www.espacioculinario.cl/wp-content/plugins/recipe-card/js/post.js?ver=4.6.1'&gt;&lt;/script&gt;
 </code></pre>
 <p>Is its version <code>4.6.1</code>? According to the plugin homepage, its latest release was <code>1.1.7</code> but in some installations there's version contamination using the <em>Wordpress</em> version. Then it's not reliable to extract the version from some parameters like <code>ver</code>.</p>
 <p>A good idea from <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> is that for some plugins it has <code>MD5</code> comparisons of the library content, then you get the version with a great percent of preciseness. Obviously it involves an additional request to the library URL.</p>
 <h4 id="tests">Tests</h4>
 <p>I've been working for almost five years at <a href="https://scrapinghub.com">ScrapingHub</a> in several projects involving web scraping and when you develop this kind of software it's very important to have a good testing suite. Let's take as example the plugin <a href="https://github.com/urbanadventurer/WhatWeb/blob/master/plugins/eserv.rb">eserv</a> from <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a>:</p>
-<pre><code class="language-language-ruby">Plugin.define "Eserv" do
+<pre><code class="language-ruby">Plugin.define "Eserv" do
 author "Brendan Coles &lt;bcoles@gmail.com&gt;" # 2012-10-22
 version "0.1"
 description "Eserv - Mail Server - SMTP/POP3/IMAP/HTTP"
@@ -204,7 +204,7 @@ end
 <p>What happens if the first entry in <code>matches</code> doesn't get the version completely for a site but the second one does? Is it fine to move the second entry to the top to be the first regex to be tried? With 5 sites it's manageable but when the list grows, it's hard to know if with our changes we're affecting the accurate detection in some sites.</p>
 <p>Neither <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> nor <a href="https://wappalyzer.com/">Wappalyzer</a> have public tests in their repositories and I think they are really important to have consistent results.</p>
 <h3 id="conclusions">Conclusions</h3>
-<p>After reviewing the <em>state-of-the-art</em> in the field, I would like to introduce <strong>detectem</strong>, a new application for web software detection in the <a href="http://spect.cl/blog/2016/11/introducing-detectem/">next post</a>.</p>
+<p>After reviewing the <em>state-of-the-art</em> in the field, I would like to introduce <strong>detectem</strong>, a new application for web software detection in the <a href="https://spect.cl/blog/2016/11/introducing-detectem/">next post</a>.</p>
 </div>
         </section>
 

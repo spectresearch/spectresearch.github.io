@@ -27,7 +27,7 @@
     <meta property="og:description" content="El pasado Jueves y Viernes se realizó la 8dot8 en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención. ASCII numbers El primer desafío de programación era responder correctamente 500 números mostrados en ASCII">
     <meta property="og:url" content="http://www.spect.cl/blog/2017/10/writeup-ctf-8dot8-2017/">
     <meta property="article:published_time" content="2017-10-30T17:15:09.000Z">
-    <meta property="article:modified_time" content="2017-10-30T17:25:51.000Z">
+    <meta property="article:modified_time" content="2017-10-30T18:03:04.000Z">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Writeup CTF 8dot8 2017">
     <meta name="twitter:description" content="El pasado Jueves y Viernes se realizó la 8dot8 en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención. ASCII numbers El primer desafío de programación era responder correctamente 500 números mostrados en ASCII">
@@ -65,7 +65,7 @@
     "headline": "Writeup CTF 8dot8 2017",
     "url": "http://www.spect.cl/blog/2017/10/writeup-ctf-8dot8-2017/",
     "datePublished": "2017-10-30T17:15:09.000Z",
-    "dateModified": "2017-10-30T17:25:51.000Z",
+    "dateModified": "2017-10-30T18:03:04.000Z",
     "description": "El pasado Jueves y Viernes se realizó la 8dot8 en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención. ASCII numbers El primer desafío de programación era responder correctamente 500 números mostrados en ASCII",
     "mainEntityOfPage": {
         "@type": "WebPage",
@@ -140,7 +140,7 @@ var ga_id = 'UA-18043187-1';
 <li>En el caso que no nos pida una respuesta, posiblemente otra información fue recibida y la mostramos por pantalla. Esa información contenía la flag!</li>
 </ol>
 <p>Dejo con ustedes el código usado.</p>
-<pre><code class="language-language-python">import re
+<pre><code class="language-python">import re
 import commands
 
 from pwn import remote
@@ -185,7 +185,7 @@ r.close()
 </code></pre>
 <h3 id="supereasy">SuperEasy</h3>
 <p>Este desafío era un binario para Linux y como su nombre lo dice, era super easy. Se aplicaba el comando <code>strings</code> sobre el binario lo que arrojaba un curioso string en base64.</p>
-<pre><code class="language-language-bash">$ strings supereasy -n 14                 
+<pre><code class="language-bash">$ strings supereasy -n 14                 
 /lib/ld-linux.so.2                        
 __gmon_start__                            
 _IO_stdin_used                            
@@ -196,16 +196,16 @@ YzBkMzU3Njk4OTR0NGNrCg==
 <p>Al decifrarlo, daba la flag del desafío (<code>c0d35769894t4ck</code>).</p>
 <h3 id="babyrevertme">BabyRevertMe</h3>
 <p>El segundo desafío de reversing era un binario en Windows. Lo cargué en IDA y llegué al siguiente punto:</p>
-<img src="http://cdn.spect.cl/blog/posts/images/baby_revert_me_1.png">
+<img src="https://cdn.spect.cl/blog/posts/images/baby_revert_me_1.png">
 <p>Como se puede ver, había una comparación <code>JZ</code> (Jump Zero) antes de la lógica que imprime la flag. Si se realiza el salto depende del valor del registro <code>ZF</code>.</p>
 <p>Ante un input cualquiera, el valor del registro <code>ZF</code> era <code>1</code> y el programa salía. La misión era lograr que el registro <code>ZF</code> fuera <code>0</code> para imprimir la flag.</p>
 <p>Pusé un breakpoint en la comparación, cambié el valor de <code>ZF</code> en el debugger de IDA y puse un breakpoint antes que el programa acabara. Así pude obtener la flag para este desafío.</p>
-<img src="http://cdn.spect.cl/blog/posts/images/baby_revert_me_2.png">
+<img src="https://cdn.spect.cl/blog/posts/images/baby_revert_me_2.png">
 <h3 id="bugpress">Bugpress</h3>
 <p>El único desafío web era un servidor que tenía Wordpress. Luego de verificar su versión (<code>4.7.4</code>), corrí <a href="https://wpscan.org/">wpscan</a> para ver si el desafío se trataba de explotar alguna vulnerabilidad en un plugin, pero estaban instalados solo los plugins por defecto.</p>
 <p>En <a href="https://alertot.com">alertot</a> nos consideramos una startup técnica, pero de verdad.  Nuestro CTO ha trabajado para la NASA, yo aporto con el background en desarrollo y seguridad, y mi primo Guillermo es el encargado comercial. En vista de este abanico de posibilidades, ¿quién resolvió este desafío? Guillermo.</p>
 <p>Después de recordar que a mediados de año me llamó mucho la atención una vulnerabilidad en Wordpress sobre la recuperación de contraseña (<a href="https://exploitbox.io/vuln/WordPress-Exploit-4-7-Unauth-Password-Reset-0day-CVE-2017-8295.html">Password Reset vulnerability</a>), se lo comenté y me dijo que él estaba interesado en hacer la explotación. Tomó la información del advisory, creo las condiciones para explotar la vulnerabilidad satisfactoriamente y unas horas después me envió la flag.</p>
-<img src="http://cdn.spect.cl/blog/posts/images/wordpress_flag.jpg"></div>
+<img src="https://cdn.spect.cl/blog/posts/images/wordpress_flag.jpg"></div>
         </section>
 
         <footer class="post-footer">
