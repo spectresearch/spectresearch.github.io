@@ -1,0 +1,295 @@
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Writeup CTF 8dot8 2017</title>
+    <meta name="description" content="">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8bbf62db74">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8bbf62db74">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
+
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="canonical" href="http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <link rel="amphtml" href="http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/amp/">
+    
+    <meta property="og:site_name" content="SPECT Research">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Writeup CTF 8dot8 2017">
+    <meta property="og:description" content="El pasado Jueves y Viernes se realizó la 8dot8 en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención. ASCII numbers El primer desafío de programación era responder correctamente 500 números mostrados en ASCII">
+    <meta property="og:url" content="http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/">
+    <meta property="article:published_time" content="2017-10-30T17:15:09.000Z">
+    <meta property="article:modified_time" content="2017-10-30T17:25:51.000Z">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Writeup CTF 8dot8 2017">
+    <meta name="twitter:description" content="El pasado Jueves y Viernes se realizó la 8dot8 en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención. ASCII numbers El primer desafío de programación era responder correctamente 500 números mostrados en ASCII">
+    <meta name="twitter:url" content="http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/">
+    <meta name="twitter:label1" content="Written by">
+    <meta name="twitter:data1" content="Claudio Salazar">
+    <meta name="twitter:site" content="@spectresearch">
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "SPECT Research",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://localhost:2368/favicon.ico",
+            "width": 60,
+            "height": 60
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Claudio Salazar",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "http://localhost:2368/author/claudio/",
+        "sameAs": []
+    },
+    "headline": "Writeup CTF 8dot8 2017",
+    "url": "http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/",
+    "datePublished": "2017-10-30T17:15:09.000Z",
+    "dateModified": "2017-10-30T17:25:51.000Z",
+    "description": "El pasado Jueves y Viernes se realizó la 8dot8 en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención. ASCII numbers El primer desafío de programación era responder correctamente 500 números mostrados en ASCII",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "http://localhost:2368/"
+    }
+}
+    </script>
+
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8bbf62db74"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
+    <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://localhost:2368/rss/">
+    <script>
+var disqus_shortname = 'spectresearch';
+var ga_id = 'UA-18043187-1';
+</script>
+</head>
+
+<body><header class="main-header no-cover">
+    <div class="vertical">
+        <div class="main-header-content inner">
+            <h1 class="page-title">SPECT Research</h1>
+            <h2 class="page-description">Security and Software Development</h2>
+            <br>
+            <div>
+              <a class="spectnav" href="/"><i class="fa fa-home"></i> Home</a>
+              <a class="spectnav" href="/about/"><i class="fa fa-group"></i> About us</a>
+              <a class="spectnav" href="/projects/"><i class="fa fa-copy"></i> Projects</a>
+              <a class="spectnav" href="/education/"><i class="fa fa-book"></i> Education</a>
+            </div>
+            <div>
+              <a class="spectnav" href="http://github.com/spectresearch"><i class="spectnav fa fa-github"></i></a>
+              <a class="spectnav" href="http://twitter.com/spectresearch"><i class="spectnav fa fa-twitter"></i></a>
+            </div>
+        </div>
+    </div>
+    <a class="scroll-down icon-arrow-left" href="#content" data-offset="-45"><span class="hidden">Scroll Down</span></a>
+</header>
+
+
+
+    
+
+    <div class="site-wrapper">
+
+        
+
+
+<main class="content" role="main">
+    <article class="post">
+
+        <header class="post-header">
+            <h1 class="post-title">Writeup CTF 8dot8 2017</h1>
+            <section class="post-meta">
+                <time class="post-date" datetime="2017-10-30">30 October 2017</time> 
+            </section>
+        </header>
+
+        <section class="post-content">
+            <div class="kg-card-markdown"><p>El pasado Jueves y Viernes se realizó la <a href="https://8dot8.org">8dot8</a> en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención.</p>
+<h3 id="asciinumbers">ASCII numbers</h3>
+<p>El primer desafío de programación era responder correctamente 500 números mostrados en <a href="https://en.wikipedia.org/wiki/ASCII_art">ASCII art</a> a través de un servicio de red. El estilo de estos números me recordó a <a href="https://en.wikipedia.org/wiki/ASCII_art">FIGlet</a>, por lo que trate de resolverlo usando ese programa. Los pasos que seguí fueron:</p>
+<ol>
+<li>Crear la lista de números ASCII usando FIGlet y aplicar una limpieza para eliminar saltos de línea y espacios. Se supone que el índice de la lista corresponde con el número ASCII (<code>numbers[0]</code> corresponde con el número cero).</li>
+<li>Basado en la información recibida, si el servidor envía los números y pide una respuesta, empezamos el procesamiento de los números recibidos.</li>
+<li>La información recibida la separamos por líneas y normalmente los números estarán entre las líneas 1-4, por lo tanto realizamos la misma limpieza que en el punto 1 para poder comparar la existencia de un número. De esa forma armamos nuestra respuesta y la enviamos al servidor.</li>
+<li>En el caso que no nos pida una respuesta, posiblemente otra información fue recibida y la mostramos por pantalla. Esa información contenía la flag!</li>
+</ol>
+<p>Dejo con ustedes el código usado.</p>
+<pre><code class="language-language-python">import re
+import commands
+
+from pwn import remote
+
+
+# 1
+numbers = []
+for i in range(10):
+    number = commands.getoutput('figlet %d' % i)
+    number = re.sub('\n|\s', '', number)
+    numbers.append(number)
+
+r = remote('luckyctf.rtfm-ctf.org', 1337)
+output = r.recv()
+
+while True:
+    output = r.recv()
+    
+    # 2
+    if output.endswith('Answer: '):
+        to_guess = output.split('\n\n')
+
+        # 3
+        rs = ''
+        for i in range(1, 5):
+            n = re.sub('\n|\s', '', to_guess[i])
+
+            for i in range(10):
+                if n == numbers[i]:
+                    rs += '%d' % i
+                    break
+
+        print('.')
+        r.sendline(rs)
+        r.recv()
+    else:
+        # 4
+        print(output)
+        break
+
+r.close()
+</code></pre>
+<h3 id="supereasy">SuperEasy</h3>
+<p>Este desafío era un binario para Linux y como su nombre lo dice, era super easy. Se aplicaba el comando <code>strings</code> sobre el binario lo que arrojaba un curioso string en base64.</p>
+<pre><code class="language-language-bash">$ strings supereasy -n 14                 
+/lib/ld-linux.so.2                        
+__gmon_start__                            
+_IO_stdin_used                            
+__libc_start_main                         
+Entre com a senha para abrir a flag:      
+YzBkMzU3Njk4OTR0NGNrCg==      
+</code></pre>
+<p>Al decifrarlo, daba la flag del desafío (<code>c0d35769894t4ck</code>).</p>
+<h3 id="babyrevertme">BabyRevertMe</h3>
+<p>El segundo desafío de reversing era un binario en Windows. Lo cargué en IDA y llegué al siguiente punto:</p>
+<img src="http://cdn.spect.cl/blog/posts/images/baby_revert_me_1.png">
+<p>Como se puede ver, había una comparación <code>JZ</code> (Jump Zero) antes de la lógica que imprime la flag. Si se realiza el salto depende del valor del registro <code>ZF</code>.</p>
+<p>Ante un input cualquiera, el valor del registro <code>ZF</code> era <code>1</code> y el programa salía. La misión era lograr que el registro <code>ZF</code> fuera <code>0</code> para imprimir la flag.</p>
+<p>Pusé un breakpoint en la comparación, cambié el valor de <code>ZF</code> en el debugger de IDA y puse un breakpoint antes que el programa acabara. Así pude obtener la flag para este desafío.</p>
+<img src="http://cdn.spect.cl/blog/posts/images/baby_revert_me_2.png">
+<h3 id="bugpress">Bugpress</h3>
+<p>El único desafío web era un servidor que tenía Wordpress. Luego de verificar su versión (<code>4.7.4</code>), corrí <a href="https://wpscan.org/">wpscan</a> para ver si el desafío se trataba de explotar alguna vulnerabilidad en un plugin, pero estaban instalados solo los plugins por defecto.</p>
+<p>En <a href="https://alertot.com">alertot</a> nos consideramos una startup técnica, pero de verdad.  Nuestro CTO ha trabajado para la NASA, yo aporto con el background en desarrollo y seguridad, y mi primo Guillermo es el encargado comercial. En vista de este abanico de posibilidades, ¿quién resolvió este desafío? Guillermo.</p>
+<p>Después de recordar que a mediados de año me llamó mucho la atención una vulnerabilidad en Wordpress sobre la recuperación de contraseña (<a href="https://exploitbox.io/vuln/WordPress-Exploit-4-7-Unauth-Password-Reset-0day-CVE-2017-8295.html">Password Reset vulnerability</a>), se lo comenté y me dijo que él estaba interesado en hacer la explotación. Tomó la información del advisory, creo las condiciones para explotar la vulnerabilidad satisfactoriamente y unas horas después me envió la flag.</p>
+<img src="http://cdn.spect.cl/blog/posts/images/wordpress_flag.jpg"></div>
+        </section>
+
+        <footer class="post-footer">
+
+
+            <figure class="author-image">
+                <a class="img" href="/author/claudio/" style="background-image: url(//www.gravatar.com/avatar/134e22ab3b4cac1e783f88f84917bc12?s=250&amp;d=mm&amp;r=x)"><span class="hidden">Claudio Salazar's Picture</span></a>
+            </figure>
+
+            <section class="author">
+                <h4><a href="/author/claudio/">Claudio Salazar</a></h4>
+
+                    <p>Read <a href="/author/claudio/">more posts</a> by this author.</p>
+                <div class="author-meta">
+                    
+                    
+                </div>
+            </section>
+
+
+            <section class="share">
+                <h4>Share this post</h4>
+                <a class="icon-twitter" href="https://twitter.com/share?text=Writeup%20CTF%208dot8%202017&amp;url=http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/" onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+                    <span class="hidden">Twitter</span>
+                </a>
+                <a class="icon-facebook" href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/" onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+                    <span class="hidden">Facebook</span>
+                </a>
+                <a class="icon-google-plus" href="https://plus.google.com/share?url=http://localhost:2368/blog/2017/10/writeup-ctf-8dot8-2017/" onclick="window.open(this.href, 'google-plus-share', 'width=490,height=530');return false;">
+                    <span class="hidden">Google+</span>
+                </a>
+            </section>
+
+        <footer class="post comments">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  (function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + window.disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</footer>
+
+        </footer>
+
+    </article>
+</main>
+
+<aside class="read-next">
+    <a class="read-next-story prev no-cover" href="/blog/2016/11/introducing-detectem/">
+        <section class="post">
+            <h2>Introducing detectem</h2>
+            <p>I've created a project named detectem, trying to solve the issues described in the previous post. Let's review its…</p>
+        </section>
+    </a>
+</aside>
+
+
+
+        <footer class="site-footer clearfix">
+            <section class="copyright"><a href="http://localhost:2368">SPECT Research</a> © 2017</section>
+        </footer>
+
+    </div>
+
+    <!-- You can safely delete this line if your theme does not require jQuery -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script>
+  if (window.ga_id) {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', window.ga_id, 'auto');
+    ga('require', 'linkid', 'linkid.js');
+    ga('send', 'pageview');
+  }
+</script>
+
+    <script type="text/javascript" src="/assets/js/prism.js?v=8bbf62db74"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8bbf62db74"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8bbf62db74"></script>
+
+
+</body>
