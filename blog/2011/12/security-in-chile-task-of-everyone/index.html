@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2011/12/security-in-chile-task-of-everyone/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2011/12/security-in-chile-task-of-everyone/amp/">
@@ -46,7 +48,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -68,12 +75,19 @@
     "description": "In SPECT Research we&#x27;re in favor of responsible vulnerability notification, giving some time to developers to make the necessary changes in the development environment and the subsequent step to production. We&#x27;re not used to show vulnerabilities of web sites, but we&#x27;ve done public some vulnerabilities in hardware that after months",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -122,25 +136,18 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p>In SPECT Research we're in favor of responsible vulnerability notification, giving some time to developers to make the necessary changes in the development environment and the subsequent step to production. We're not used to show vulnerabilities of web sites, but we've done public some vulnerabilities in hardware that after months trying to solve them, the vendor hasn't paid us attention, in a way to punish that organizations that are not worried about their users safety, but we always showed in our publication workarounds for them. </p>
-
+            <div class="kg-card-markdown"><p>In SPECT Research we're in favor of responsible vulnerability notification, giving some time to developers to make the necessary changes in the development environment and the subsequent step to production. We're not used to show vulnerabilities of web sites, but we've done public some vulnerabilities in hardware that after months trying to solve them, the vendor hasn't paid us attention, in a way to punish that organizations that are not worried about their users safety, but we always showed in our publication workarounds for them.</p>
 <p>We're aware that there are organizations interested in solving their security problems, showing it to us with a quick answer and putting us through to the application developers, so like others with lack of interest and they leave it in a second place. It's important to analyze the role that play developers, organizations and vulnerability reporters with the goal of doing the national Internet a safer place for everyone.</p>
-
 <h2 id="developers">Developers</h2>
-
-<p>We are in the year 2011, and the secure practices in software development are well-known. We're also developers, and in each release we make of our applications we're worried as much software quality as no including vulnerabilities that could compromise our users. Personally, I think security verifications must be an important part in software development life-cycle <br>
+<p>We are in the year 2011, and the secure practices in software development are well-known. We're also developers, and in each release we make of our applications we're worried as much software quality as no including vulnerabilities that could compromise our users. Personally, I think security verifications must be an important part in software development life-cycle<br>
 (<em>SDLC</em>), and not a couple of points in charge of QA teams. Today to become a whole developer means to get concerned of the good practices of security programming, understanding each programming language has functions that they have to be handled carefully, as well as to code with dedication to not add vulnerabilities due mistakes in application logic. In my  opinion, that's the difference between a developer and a programmer.</p>
-
 <h2 id="organizations">Organizations</h2>
-
-<p>The organizations, in first place, must have policies established about the security of software that is developed inside them and is used by their users. If they delegate this responsability to third-parties, they must demand a software of quality, and at least, it doesn't have vulnerabilities that are <br>
+<p>The organizations, in first place, must have policies established about the security of software that is developed inside them and is used by their users. If they delegate this responsability to third-parties, they must demand a software of quality, and at least, it doesn't have vulnerabilities that are<br>
 discovered in a five-minutes analysis. Also the organizations, in each site, must have contact forms, not only commercial, but technical contact to report security vulnerabilities in a better way. As reporter, it's too discouraging to find with help desks that they don't know how to address the reports, or chains of many people to reach the developers in charge. On the other side, it's pleasant to find organizations that answer quickly and efficiently to our requests, that after all, want to improve their service quality. A organization with good attitude to solve the vulnerabilities also generate disposal from people of security world to send reports and to have a successful ending.</p>
-
 <h2 id="vulnerabilityreporters">Vulnerability reporters</h2>
-
 <p>I think the best way to solve security problems is through responsible notification, since it establishes a good relationship with the organization and they can resolve their problems without harm in their image. Make public a vulnerability in full-disclosure way not only affects to the involved organization, also to their users that could be victim of an attack exploiting the vulnerability published  irresponsibly. Both ways are acceptable, but in <em>SPECT Research</em> we believe that responsible notification is the most suitable. Security reporters must be responsible with the information they have and handle it in the best way to resolve the problems.</p>
-
 <p>As you see, security is a problem with many factors and here I tried to mention only three, the most important to me. It's necessary that each one of these body makes an effort to decrease the number of vulnerabilities in software applications, disposal to solve security problems in an efficient way and responsability in the disclosure of vulnerability to not have situations to regret, it's a task of everyone to make the national Internet a safer place for the users.</p>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -210,7 +217,7 @@ discovered in a five-minutes analysis. Also the organizations, in each site, mus
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -229,9 +236,9 @@ discovered in a five-minutes analysis. Also the organizations, in each site, mus
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>

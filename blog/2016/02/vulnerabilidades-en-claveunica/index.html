@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2016/02/vulnerabilidades-en-claveunica/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2016/02/vulnerabilidades-en-claveunica/amp/">
@@ -22,7 +24,7 @@
     <meta property="og:site_name" content="SPECT Research">
     <meta property="og:type" content="article">
     <meta property="og:title" content="Vulnerabilidades en Clave Unica">
-    <meta property="og:description" content="Clave Única es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su documentación técnica usa OpenID Connect 1.0 y también se describe su funcionamiento interno en detalle.  Desde el punto de vista legal, hay un">
+    <meta property="og:description" content="Clave Única es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su documentación técnica usa OpenID Connect 1.0 y también se describe su funcionamiento interno en detalle. Desde el punto de vista legal, hay un">
     <meta property="og:url" content="http://www.spect.cl/blog/2016/02/vulnerabilidades-en-claveunica/">
     <meta property="article:published_time" content="2016-02-29T18:11:00.000Z">
     <meta property="article:modified_time" content="2016-02-29T18:12:01.000Z">
@@ -31,7 +33,7 @@
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Vulnerabilidades en Clave Unica">
-    <meta name="twitter:description" content="Clave Única es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su documentación técnica usa OpenID Connect 1.0 y también se describe su funcionamiento interno en detalle.  Desde el punto de vista legal, hay un">
+    <meta name="twitter:description" content="Clave Única es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su documentación técnica usa OpenID Connect 1.0 y también se describe su funcionamiento interno en detalle. Desde el punto de vista legal, hay un">
     <meta name="twitter:url" content="http://www.spect.cl/blog/2016/02/vulnerabilidades-en-claveunica/">
     <meta name="twitter:label1" content="Written by">
     <meta name="twitter:data1" content="Claudio Salazar">
@@ -46,7 +48,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -65,15 +72,22 @@
     "datePublished": "2016-02-29T18:11:00.000Z",
     "dateModified": "2016-02-29T18:12:01.000Z",
     "keywords": "security, chile",
-    "description": "Clave Única es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su documentación técnica usa OpenID Connect 1.0 y también se describe su funcionamiento interno en detalle.  Desde el punto de vista legal, hay un",
+    "description": "Clave Única es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su documentación técnica usa OpenID Connect 1.0 y también se describe su funcionamiento interno en detalle. Desde el punto de vista legal, hay un",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -122,122 +136,77 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p><a href="https://www.claveunica.gob.cl/">Clave Única</a> es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su <a href="https://www.claveunica.gob.cl/documentacion.html">documentación técnica</a> usa <a href="https://openid.net/connect/">OpenID Connect 1.0</a> y también se describe su funcionamiento interno <a href="https://www.claveunica.gob.cl/documentacion/configuracion.html">en detalle</a>. </p>
-
+            <div class="kg-card-markdown"><p><a href="https://www.claveunica.gob.cl/">Clave Única</a> es un sistema desarrollado por el gobierno chileno para autenticar y autorizar a los ciudadanos a usar una variedad de servicios gubernamentales. Según su <a href="https://www.claveunica.gob.cl/documentacion.html">documentación técnica</a> usa <a href="https://openid.net/connect/">OpenID Connect 1.0</a> y también se describe su funcionamiento interno <a href="https://www.claveunica.gob.cl/documentacion/configuracion.html">en detalle</a>.</p>
 <p>Desde el punto de vista legal, hay un <a href="https://www.claveunica.gob.cl/assets/docs/Naturaleza_juridica.pdf">documento</a> especificando su alcance. Cito como se estipula en la sección <em>V. CONCLUSIONES.</em>.</p>
-
 <blockquote>
-  <p>La utilización de “ClaveÚnica” tendrá la misma validez y efectos jurídicos que
-  tendría si los actos, contratos o declaraciones fueran efectuados por escrito y suscritos <br>
-  a través de una firma manuscrita.</p>
+<p>La utilización de “ClaveÚnica” tendrá la misma validez y efectos jurídicos que<br>
+tendría si los actos, contratos o declaraciones fueran efectuados por escrito y suscritos<br>
+a través de una firma manuscrita.</p>
 </blockquote>
-
 <p>Entonces, cualquier vulnerabilidad que presente no solo afecta a un ciudadano como un usuario dentro de un sistema, sino que también puede tener efectos legales que lo perjudiquen. En esta investigación describiré una serie de vulnerabilidades en la plataforma <strong>Clave Única</strong>, las cuales tras ser reportadas no han sido completamente solucionadas.</p>
-
 <p>PD: Siendo que no soy experto en <em>OpenID Connect</em>, cualquier corrección es bienvenida.</p>
-
 <h6 id="peticindeejemplo">Petición de ejemplo</h6>
-
 <p>Cada servicio crea una petición acorde a la información que necesita, por lo tanto todas las peticiones hacia <strong>Clave Única</strong> no son iguales. Lo que si, hay algunos campos que son comunes como (más información puede ser consultada <a href="https://openid.net/specs/openid-authentication-1_1.html#mode_checkid_setup">aquí</a>):</p>
-
 <ul>
 <li><em>openid.identity</em>: <code>http://specs.openid.net/auth/2.0/identifier_select</code></li>
 <li><em>openid.assoc_handle</em>: valor generado por el servicio gubernamental para autenticar que la petición fue realizada por él. Corresponde al <a href="https://www.claveunica.gob.cl/documentacion/configuracion.html">paso 1</a> de la guía.</li>
 <li><em>openid.return_to</em>: <em>URL</em> a la que <em>Clave Única</em> devuelve el control después de una autenticación correcta.</li>
-<li><em>openid.realm</em>: parámetro opcional que define el dominio. </li>
+<li><em>openid.realm</em>: parámetro opcional que define el dominio.</li>
 <li><em>openid.mode</em>: <code>checkid_setup</code></li>
 <li><em>openid.ns</em>: <code>http://specs.openid.net/auth/2.0</code></li>
 </ul>
-
 <p>Por lo visto, la información requerida sobre el ciudadano se agrega al namespace <code>openid.ns</code> u <code>openid.ax</code>. En ejemplo, se tomará la petición creada por un sitio del <a href="http://mi.indap.cl">Indap</a> a <strong>Clave Única</strong>.</p>
-
-<pre><code>https://www.claveunica.cl/autenticacion/openid?openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&amp;openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&amp;openid.assoc_handle=5149ecec9e5cbaa36eeb4aae0a8ea403da5fbe5b&amp;openid.return_to=http%3A%2F%2Fmi.indap.cl%2Findex.aspx%3Fdnoa.userSuppliedIdentifier%3Dhttps%253A%252F%252Fwww.claveunica.cl%252Fautenticacion%252Fopenid&amp;openid.realm=http%3A%2F%2Fmi.indap.cl%2F&amp;openid.mode=checkid_setup&amp;openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&amp;openid.ns.alias3=http%3A%2F%2Fopenid.net%2Fsrv%2Fax%2F1.0&amp;openid.alias3.required=alias1&amp;openid.alias3.mode=fetch_request&amp;openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid&amp;openid.alias3.count.alias1=1  
+<pre><code>https://www.claveunica.cl/autenticacion/openid?openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&amp;openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&amp;openid.assoc_handle=5149ecec9e5cbaa36eeb4aae0a8ea403da5fbe5b&amp;openid.return_to=http%3A%2F%2Fmi.indap.cl%2Findex.aspx%3Fdnoa.userSuppliedIdentifier%3Dhttps%253A%252F%252Fwww.claveunica.cl%252Fautenticacion%252Fopenid&amp;openid.realm=http%3A%2F%2Fmi.indap.cl%2F&amp;openid.mode=checkid_setup&amp;openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&amp;openid.ns.alias3=http%3A%2F%2Fopenid.net%2Fsrv%2Fax%2F1.0&amp;openid.alias3.required=alias1&amp;openid.alias3.mode=fetch_request&amp;openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid&amp;openid.alias3.count.alias1=1
 </code></pre>
-
 <h2 id="vulnerabilidades">Vulnerabilidades</h2>
-
 <p>Este reporte resume una serie de vulnerabilidades. Primero, los casos de <a href="https://es.wikipedia.org/wiki/Cross-site_scripting">Cross Site Scripting</a> (XSS) en la página de ingreso de credenciales son críticos ya que un atacante podría usurpar el usuario y contraseña ingresados.</p>
-
 <h4 id="xssatravsdelparmetroopenidreturn_to">XSS a través del parámetro <code>openid.return_to</code></h4>
-
-<p>Si no está presente el parámetro <code>openid.realm</code>, <code>openid.return_to</code> es reflejado en la página <code>https://www.claveunica.cl/autenticacion/openid</code>, siendo posible inyectar código <em>HTML</em> y <em>Javascript</em>. Reemplazando en nuestra petición de ejemplo ambos parámetros con: </p>
-
-<pre><code class="language- language-html">openid.return_to=http%3A%2F%2Fexample.org%2F&lt;script&gt;alert('test')&lt;/script&gt;  
+<p>Si no está presente el parámetro <code>openid.realm</code>, <code>openid.return_to</code> es reflejado en la página <code>https://www.claveunica.cl/autenticacion/openid</code>, siendo posible inyectar código <em>HTML</em> y <em>Javascript</em>. Reemplazando en nuestra petición de ejemplo ambos parámetros con:</p>
+<pre><code class="language-language-html">openid.return_to=http%3A%2F%2Fexample.org%2F&lt;script&gt;alert('test')&lt;/script&gt;
 </code></pre>
-
 <p>Se explota correctamente la vulnerabilidad.</p>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/cu_xss_redirect_to.png" height="600" width="720"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/cu_xss_redirect_to.png" height="600" width="720">
 <h4 id="xssatravsdelparmetroopenidrealm">XSS a través del parámetro <code>openid.realm</code></h4>
-
 <p>El parámetro <code>openid.realm</code> es reflejado en la página <code>https://www.claveunica.cl/autenticacion/openid</code>, siendo posible inyectar código <em>HTML</em> y <em>Javascript</em>. Sin embargo, no es tan simple como poner nuestro vector de ataque sino que hay una relación entre <code>openid.realm</code> y <code>openid.return_to</code>, la cual es:</p>
-
 <blockquote>
-  <p><code>openid.realm</code> debe estar contenido en <code>openid.return_to</code>.</p>
+<p><code>openid.realm</code> debe estar contenido en <code>openid.return_to</code>.</p>
 </blockquote>
-
 <p>Entonces, enviando ambos parámetros iguales podemos explotar la vulnerabilidad:</p>
-
-<pre><code class="language- language-html">openid.return_to=http%3A%2F%2Fexample.org%2F&lt;script&gt;alert('test')&lt;/script&gt;&amp;openid.realm=http%3A%2F%2Fexample.org%2F&lt;script&gt;alert('test')&lt;/script&gt;  
+<pre><code class="language-language-html">openid.return_to=http%3A%2F%2Fexample.org%2F&lt;script&gt;alert('test')&lt;/script&gt;&amp;openid.realm=http%3A%2F%2Fexample.org%2F&lt;script&gt;alert('test')&lt;/script&gt;
 </code></pre>
-
 <h4 id="xssatravsdensdata">XSS a través de <code>ns</code> data</h4>
-
 <p>Por lo que entiendo, el namespace <code>openid.ns</code> se utiliza para describir qué datos del ciudadano necesita saber el servicio. Por ejemplo, el sitio del <a href="http://mi.indap.cl">Indap</a> solicita esta información:</p>
-
 <p><code>openid.ns.alias3=http%3A%2F%2Fopenid.net%2Fsrv%2Fax%2F1.0&amp;openid.alias3.required=alias1&amp;openid.alias3.mode=fetch_request&amp;openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid&amp;openid.alias3.count.alias1=1</code></p>
-
 <p>Lo cual se refleja en la página <code>https://www.claveunica.cl/autenticacion/openid</code> como:</p>
-
-<pre><code class="language- language-html">&lt;input type="hidden" name="attributes[person/guid]" value="1" /&gt;  
+<pre><code class="language-language-html">&lt;input type="hidden" name="attributes[person/guid]" value="1" /&gt;
 </code></pre>
-
 <p>Luego de un análisis, el parámetro <code>openid.alias3.type.alias1</code> no es correctamente incrustado y se da un caso de <em>Cross Site Scripting</em>. Un vector de ataque exitoso sería reemplazar el parámetro por:</p>
-
-<pre><code class="language- language-html">openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid"&gt;&lt;script&gt;alert("test")&lt;/script&gt;&lt;!--  
+<pre><code class="language-language-html">openid.alias3.type.alias1=http%3A%2F%2Faxschema.org%2Fperson%2Fguid"&gt;&lt;script&gt;alert("test")&lt;/script&gt;&lt;!--
 </code></pre>
-
 <p>El mismo tipo de escenario se da con los datos declarados a través de <code>openid.ax</code> como en la petición generada por <a href="https://fne.chilesinpapeleo.cl/tramites/disponibles">la Fiscalía Nacional Económica</a>.</p>
-
 <h4 id="faltadecifradoenopenidredirect_to">Falta de cifrado en <code>openid.redirect_to</code></h4>
-
 <p>Si bien la <a href="https://www.claveunica.gob.cl/documentacion/configuracion.html">guía</a> recalca el uso de <em>HTTPS</em>, <strong>Clave Única</strong> no fuerza a que el parámetro <code>openid.redirect_to</code> use <em>HTTPS</em>, pudiendo utilizar <em>HTTP</em>. El flujo en el escenario anteriormente mencionado se puede graficar como:</p>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/cu_http_https.png"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/cu_http_https.png">
 <p>Esto posibilita que un atacante haciendo un ataque <a href="https://es.wikipedia.org/wiki/Ataque_Man-in-the-middle">man-in-the-middle</a> no será capaz de leer el contenido de la petición <em>HTTPS</em> desde el servicio a <strong>Clave Única</strong>, pero si podrá leer la petición desde <strong>Clave Única</strong> al servicio y que contiene el código de acceso.</p>
-
 <p>Este caso se encuentra en páginas como <a href="http://mi.indap.cl">Indap</a> que tiene una página de retorno en <em>HTTP</em>: <code>openid.return_to=http://mi.indap.cl/index.aspx</code></p>
-
 <h4 id="faltadetokendeestado">Falta de token de estado</h4>
-
 <p>El <a href="https://www.claveunica.gob.cl/documentacion/configuracion.html">primer paso de la guía</a> es sobre la creación de un token de estado, sin embargo <strong>Clave Única</strong> no fuerza su requerimiento. Un ejemplo de esto es la <a href="http://www.sag.cl/oficina_virtual">oficina virtual del SAG</a> que en su petición a <strong>Clave Única</strong> no envía un token de estado (no existe el parámetro <code>openid.assoc_handle</code>).</p>
-
 <h4 id="generacindeerrorydivulgacindesoftware">Generación de error y divulgación de software</h4>
-
 <p>Una petición quitando los parámetros <code>openid.identity</code> y <code>openid.assoc_handle</code> generó los siguientes errores:</p>
-
-<pre><code>A PHP Error was encountered  
-Severity: Notice  
-Message: Undefined index: openid_identity  
-Filename: LightOpenIDProvider/provider.php  
-Line Number: 346  
+<pre><code>A PHP Error was encountered
+Severity: Notice
+Message: Undefined index: openid_identity
+Filename: LightOpenIDProvider/provider.php
+Line Number: 346
 </code></pre>
-
 <p>Tomando en cuenta el tipo de error, nombre de fichero y línea, podemos darnos cuenta que <strong>Clave Única</strong> está usando <a href="https://github.com/iignatov/LightOpenID/blob/master/provider/provider.php#L346">LightOpenID</a> como biblioteca para gestionar el uso de <em>OpenID</em>. Esto abre la posibilidad de encontrar más vulnerabilidades leyendo el código fuente.</p>
-
 <h3 id="mitigacionesytimeline">Mitigaciones y Timeline</h3>
-
-<p>Esta serie de vulnerabilidades fueron reportadas con la ayuda del <a href="http://www.csirt.gob.cl/">CSIRT</a>. Ellos permitieron que mi reporte llegara a los desarrolladores, los cuales no establecieron contacto directo conmigo. </p>
-
+<p>Esta serie de vulnerabilidades fueron reportadas con la ayuda del <a href="http://www.csirt.gob.cl/">CSIRT</a>. Ellos permitieron que mi reporte llegara a los desarrolladores, los cuales no establecieron contacto directo conmigo.</p>
 <p>Los casos de <em>Cross Site Scripting</em> fueron parcialmente solucionados con una especie de <a href="https://www.owasp.org/index.php/Web_Application_Firewall">firewall web</a> (o biblioteca) que filtra y sanitiza ciertos vectores comunes, demostrando el poco entendimiento de cómo solucionar este tipo de vulnerabilidades. La página sigue siendo vulnerable pero momentaneamente no explotable gracias a esta solución de firewall web. Sin embargo, nuevos vectores pueden aparecer a largo plazo que esquiven las reglas del firewall web y la explotación de la vulnerabilidad vuelva a ser exitosa.</p>
-
 <p>Los restantes problemas son producto del no seguimiento de sus propias <a href="https://www.claveunica.gob.cl/documentacion/configuracion.html">políticas</a> y la incorrecta configuración de sus servidores. Al parecer no revisten importancia ya que no fueron solucionados.</p>
-
 <p>Hay una serie de cosas que no fueron notificadas, como por ejemplo el hecho de que uno puede autentificar un dominio propio con <strong>Clave Única</strong>. Si bien no es tan simple como obtener un token en un dominio propio y luego enviarlo a cualquier servicio, esto podría encadenarse con otros errores para dar paso a una vulnerabilidad más ingeniosa.</p>
-
 <p>El tiempo que demoraron en solucionar lo reportado fue alrededor de dos semanas y agradezco la forma eficiente y rápida en que el <a href="http://www.csirt.gob.cl/">CSIRT</a> manejo la notificación.</p>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -307,7 +276,7 @@ Line Number: 346
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -326,9 +295,9 @@ Line Number: 346
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>

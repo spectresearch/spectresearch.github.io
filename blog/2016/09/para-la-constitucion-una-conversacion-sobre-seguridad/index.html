@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2016/09/para-la-constitucion-una-conversacion-sobre-seguridad/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2016/09/para-la-constitucion-una-conversacion-sobre-seguridad/amp/">
@@ -46,7 +48,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -68,12 +75,19 @@
     "description": "El día de ayer fue lanzado un exploit para MySQL que permite escalar privilegios dada una serie de condiciones. El peor caso es que una simple inyección SQL puede llevar a un atacante a obtener privilegios de administrador a nivel de sistema operativo en el servidor donde reside la base",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -122,32 +136,26 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p>El día de ayer fue lanzado un <a href="http://legalhackers.com/advisories/MySQL-Exploit-Remote-Root-Code-Execution-Privesc-CVE-2016-6662.html">exploit</a> para <a href="https://dev.mysql.com/">MySQL</a> que permite escalar privilegios dada una serie de condiciones. El peor caso es que una <em>simple</em> inyección SQL puede llevar a un atacante a obtener privilegios de administrador a nivel de sistema operativo en el servidor donde reside la base de datos. </p>
-
+            <div class="kg-card-markdown"><p>El día de ayer fue lanzado un <a href="http://legalhackers.com/advisories/MySQL-Exploit-Remote-Root-Code-Execution-Privesc-CVE-2016-6662.html">exploit</a> para <a href="https://dev.mysql.com/">MySQL</a> que permite escalar privilegios dada una serie de condiciones. El peor caso es que una <em>simple</em> inyección SQL puede llevar a un atacante a obtener privilegios de administrador a nivel de sistema operativo en el servidor donde reside la base de datos.</p>
 <p>Lo que hoy hablaré es una historia sobre seguridad, una aplicación vulnerable a inyección SQL y el proyecto estrella del actual gobierno: <a href="https://www.unaconstitucionparachile.cl">"Una Constitución para Chile"</a>. Este post trata sobre cómo se puede llegar a comprometer un proceso democrático por la falta de medidas de seguridad.</p>
-
 <h4 id="enbuscadelavulnerabilidad">En busca de la vulnerabilidad</h4>
-
 <p>Cuando participé como ciudadano en <a href="https://www.unaconstitucionparachile.cl">"Una Constitución para Chile"</a> esta ofrecía una funcionalidad limitada, solo era posible responder una encuesta y organizar un encuentro comunal. A simple vista parecía una aplicación con buenas validaciones donde encontrar una vulnerabilidad que afecte a los demás ciudadanos requería tiempo y no parecía una tarea fácil. Entonces tomé otro camino.</p>
-
 <p>La plataforma estaba balanceada y otra aplicación estaba siendo hospedada en los mismos servidores: la aplicación <code>X</code>, vulnerable a inyección SQL sobre un motor <a href="https://dev.mysql.com/">MySQL</a>. No pretendo dar mayores detalles sobre esto ya que la aplicación sigue vulnerable.</p>
-
 <p>Después de ese descubrimiento, lo reporté immediatamente a través de los canales de comunicación respectivos (Abril 2016). Pedí explícitamente que movieran la aplicación <code>X</code> a otro servidor ya que sus vulnerabilidades podían comprometer <a href="https://www.unaconstitucionparachile.cl">"Una Constitución para Chile"</a>. La transición fue realizada rápidamente.</p>
-
 <p>Respecto a las vulnerabilidades en la aplicación <code>X</code>, que podían ser fácilmente explotadas con herramientas como <a href="http://sqlmap.org/">sqlmap</a>, los desarrolladores consideraron que no eran graves ya que la información que estaba en la base de datos era acotada. Una especie de <strong>SQL-Injection-Driven development</strong> (<code>SQLIDD</code>).</p>
-
 <h4 id="hiptesis">Hipótesis</h4>
-
 <p>Para los que trabajamos en seguridad, sabemos que el peor caso es posible. Y no solo es posible, sino que buscado por ciertas personas. El caso hipótetico que quiero plantear es simple: aplicar éxitosamente el <a href="http://legalhackers.com/advisories/MySQL-Exploit-Remote-Root-Code-Execution-Privesc-CVE-2016-6662.html">exploit</a>  a la aplicación <code>X</code>, obtener privilegios de administrador y tomar el control de la plataforma <a href="https://www.unaconstitucionparachile.cl">"Una Constitución para Chile"</a>, ya sea porque están en el mismo servidor (como en un inicio) o porque comparten el servidor de base de datos. Como sea, esto compromete la validez del proceso democrático ya que la información en la base de datos puede ser adulterada.</p>
-
-<p>Hay muchas teorías más sobre posibles escenarios, sin embargo hay una premisa irremplazable para contrarrestar todo esto: <strong>no dar ventajas</strong>. Esta historia es un ejemplo claro de dos cosas que nos encontramos hoy en día: </p>
-
+<p>Hay muchas teorías más sobre posibles escenarios, sin embargo hay una premisa irremplazable para contrarrestar todo esto: <strong>no dar ventajas</strong>. Esta historia es un ejemplo claro de dos cosas que nos encontramos hoy en día:</p>
 <ol>
-<li><p>Desarrolladores con poco entendimiento de seguridad y por lo tanto no responden de forma adecuada a incidentes de seguridad.</p></li>
-<li><p>Falta de gestión del riesgo en procesos democráticos realizados a través de Internet. </p></li>
+<li>
+<p>Desarrolladores con poco entendimiento de seguridad y por lo tanto no responden de forma adecuada a incidentes de seguridad.</p>
+</li>
+<li>
+<p>Falta de gestión del riesgo en procesos democráticos realizados a través de Internet.</p>
+</li>
 </ol>
-
 <p>Quizás esta vez no paso nada, quizás para la próxima se tenga que declarar nulo un proceso completo por falta de garantías, y de ingeniería.</p>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -217,7 +225,7 @@ var ga_id = 'UA-18043187-1';
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -236,9 +244,9 @@ var ga_id = 'UA-18043187-1';
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>

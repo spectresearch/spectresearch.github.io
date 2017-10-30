@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2011/06/d-link-dir-600-cross-site-scripting-command-execution-video/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2011/06/d-link-dir-600-cross-site-scripting-command-execution-video/amp/">
@@ -22,7 +24,7 @@
     <meta property="og:site_name" content="SPECT Research">
     <meta property="og:type" content="article">
     <meta property="og:title" content="D-Link DIR-600 Cross Site Scripting &amp; Command Execution Video">
-    <meta property="og:description" content="D-Link DIR-600 is a cheap home router, currently unsupported in  USA/Canada, but supported and widely used in Latin America. In February 2011, I sent vulnerability information about command execution on D-Link DIR-600 to D-Link Chile, then to D-Link Latin America but after sending many e-mails I haven't got any">
+    <meta property="og:description" content="D-Link DIR-600 is a cheap home router, currently unsupported in USA/Canada, but supported and widely used in Latin America. In February 2011, I sent vulnerability information about command execution on D-Link DIR-600 to D-Link Chile, then to D-Link Latin America but after sending many e-mails I haven't got any">
     <meta property="og:url" content="http://www.spect.cl/blog/2011/06/d-link-dir-600-cross-site-scripting-command-execution-video/">
     <meta property="article:published_time" content="2011-06-01T11:00:00.000Z">
     <meta property="article:modified_time" content="2015-09-10T12:00:33.000Z">
@@ -31,7 +33,7 @@
     
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="D-Link DIR-600 Cross Site Scripting &amp; Command Execution Video">
-    <meta name="twitter:description" content="D-Link DIR-600 is a cheap home router, currently unsupported in  USA/Canada, but supported and widely used in Latin America. In February 2011, I sent vulnerability information about command execution on D-Link DIR-600 to D-Link Chile, then to D-Link Latin America but after sending many e-mails I haven't got any">
+    <meta name="twitter:description" content="D-Link DIR-600 is a cheap home router, currently unsupported in USA/Canada, but supported and widely used in Latin America. In February 2011, I sent vulnerability information about command execution on D-Link DIR-600 to D-Link Chile, then to D-Link Latin America but after sending many e-mails I haven't got any">
     <meta name="twitter:url" content="http://www.spect.cl/blog/2011/06/d-link-dir-600-cross-site-scripting-command-execution-video/">
     <meta name="twitter:label1" content="Written by">
     <meta name="twitter:data1" content="Claudio Salazar">
@@ -46,7 +48,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -65,15 +72,22 @@
     "datePublished": "2011-06-01T11:00:00.000Z",
     "dateModified": "2015-09-10T12:00:33.000Z",
     "keywords": "vulnerability, security",
-    "description": "D-Link DIR-600 is a cheap home router, currently unsupported in  USA/Canada, but supported and widely used in Latin America. In February 2011, I sent vulnerability information about command execution on D-Link DIR-600 to D-Link Chile, then to D-Link Latin America but after sending many e-mails I haven&#x27;t got any",
+    "description": "D-Link DIR-600 is a cheap home router, currently unsupported in USA/Canada, but supported and widely used in Latin America. In February 2011, I sent vulnerability information about command execution on D-Link DIR-600 to D-Link Chile, then to D-Link Latin America but after sending many e-mails I haven&#x27;t got any",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -122,29 +136,21 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p>D-Link DIR-600 is a cheap home router, currently unsupported in <br>
-<a href="http://www.dlink.com/DIR-600">USA/Canada</a>, but supported and widely used in <a href="http://www.dlinkla.com/home/productos/producto.jsp?idp=1297">Latin America</a>.
+            <div class="kg-card-markdown"><p>D-Link DIR-600 is a cheap home router, currently unsupported in<br>
+<a href="http://www.dlink.com/DIR-600">USA/Canada</a>, but supported and widely used in <a href="http://www.dlinkla.com/home/productos/producto.jsp?idp=1297">Latin America</a>.<br>
 In February 2011, I sent vulnerability information about command execution on D-Link DIR-600 to D-Link Chile, then to D-Link Latin America but after sending many e-mails I haven't got any response.</p>
-
 <h2 id="crosssitescriptingxss">Cross Site Scripting (XSS)</h2>
-
 <p>A common XSS was found in DIR-600 web interface.</p>
-
-<pre><code>http://router_ip/tools_vct_testing.php?port_id=bugs%22,%20[10]);%20alert('bugs');%20a=parseInt(%220  
+<pre><code>http://router_ip/tools_vct_testing.php?port_id=bugs%22,%20[10]);%20alert('bugs');%20a=parseInt(%220
 </code></pre>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/dlink_dir600_2.05_xss.png" style="height:600px; width:600px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/dlink_dir600_2.05_xss.png" style="height:600px; width:600px">
 <h2 id="commandexecution">Command Execution</h2>
-
 <p>It's a video about the vulnerability and its exploitation.</p>
-
 <iframe width="560" height="315" src="https://www.youtube.com/embed/A9K9qE21em8?rel=0" frameborder="0" allowfullscreen></iframe>
-
 <p>Currently, all firmware versions are vulnerable (2.05, 2.0). This vulnerability requires administrator privileges, but the default firmware version (2.0) is vulnerable to <a href="http://www.sourcesec.com/Lab/dlink_hnap_captcha.pdf">HNAP flaw</a> too, discovered by SourceSec Security Research. A combination of these two vulnerabilities turns out a remote code execution exploit without the need of valid authentication credentials.</p>
-
-<p>I expect that D-Link contact me to patch responsibly the vulnerability and to provide an updated firmware version to users. I will disclose soon technical details about this vulnerability and the research I've done (telnet access, fun <br>
+<p>I expect that D-Link contact me to patch responsibly the vulnerability and to provide an updated firmware version to users. I will disclose soon technical details about this vulnerability and the research I've done (telnet access, fun<br>
 with busybox and so on).</p>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -214,7 +220,7 @@ with busybox and so on).</p>
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -233,9 +239,9 @@ with busybox and so on).</p>
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>

